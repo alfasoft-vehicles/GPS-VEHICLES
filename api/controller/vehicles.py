@@ -51,23 +51,16 @@ async def vehicles_per_owner(owner_id: str, db: Session):
 async def vehicle_info(vehicle_plate: str, db: Session):
   try:
     vehicle = db.query(
-      Vehiculos.ID,
-      Vehiculos.PLACA,
       Marcas.NOMBRE.label('Brand'),
-      Vehiculos.MODELO,
       Colores.NOMBRE.label('Color'),
       TiposVehiculos.NOMBRE.label('Vehicle_type'),
       Vehiculos.ID_PROPIE.label('Owner_id'),
       Propietarios.NOMBRE.label('Owner_name'),
-      Vehiculos.SERVICIO,
       Estados.NOMBRE.label('Status'),
-      Vehiculos.CUO_ADMON,
-      Vehiculos.IVA,
-      Vehiculos.PREND_APAG,
-      Vehiculos.GPS_SERIAL,
-      Vehiculos.CEL_SERIAL,
-      Vehiculos.CEL_NUMERO,
-      Vehiculos.FEC_CREADO
+      Vehiculos.ID, Vehiculos.PLACA, Vehiculos.MODELO, Vehiculos.FEC_ESTADO, 
+      Vehiculos.PLANPAGO, Vehiculos.CUO_ADMON, Vehiculos.IVA, Vehiculos.FORMAINSTA, 
+      Vehiculos.PREND_APAG, Vehiculos.FEC_PREAPA, Vehiculos.GPS_SERIAL, Vehiculos.CEL_SERIAL,
+      Vehiculos.CEL_NUMERO, Vehiculos.COMENTARIO, Vehiculos.OBSERVA, Vehiculos.FEC_CREADO
     ).outerjoin(Marcas, Vehiculos.ID_MARCA == Marcas.ID)\
      .outerjoin(Colores, Vehiculos.ID_COLOR == Colores.ID)\
      .outerjoin(TiposVehiculos, Vehiculos.ID_TIPOVEH == TiposVehiculos.ID)\
@@ -87,14 +80,19 @@ async def vehicle_info(vehicle_plate: str, db: Session):
       'vehicle_type': vehicle.Vehicle_type,
       'owner_id': vehicle.Owner_id,
       'owner_name': vehicle.Owner_name,
-      'service': vehicle.SERVICIO,
       'status': vehicle.Status,
+      'status_date': vehicle.FEC_ESTADO,
+      'payment_plan': 'Quincenal' if vehicle.PLANPAGO == 1 else 'Mensual' if vehicle.PLANPAGO == 2 else 'Anual' if vehicle.PLANPAGO == 3 else 'No definido',
       'cuo_admon': vehicle.CUO_ADMON,
       'iva': vehicle.IVA,
-      'prend_apag': vehicle.PREND_APAG,
+      'installation_method': 'Rastreo' if vehicle.FORMAINSTA == 1 else 'Corta Corriente' if vehicle.FORMAINSTA == 2 else 'Bomba Gasolina' if vehicle.FORMAINSTA == 3 else 'Ninguno',
+      'prend_apag': 'Prendido' if vehicle.PREND_APAG == 1 else 'Apagado',
+      'prend_apag_date': vehicle.FEC_PREAPA,
       'gps_serial': vehicle.GPS_SERIAL,
       'cel_serial': vehicle.CEL_SERIAL,
       'cel_num': vehicle.CEL_NUMERO,
+      'comments': vehicle.COMENTARIO,
+      'observations': vehicle.OBSERVA,
       'date_created': vehicle.FEC_CREADO
     }
 
@@ -115,6 +113,13 @@ async def all_vehicles(pagination: VehiclePagination, db: Session):
       Vehiculos.ID_TIPOVEH,
       Vehiculos.ID_ESTADO,
       Vehiculos.ID_PROPIE,
+      Vehiculos.PLANPAGO,
+      Vehiculos.CUO_ADMON,
+      Vehiculos.FORMAINSTA,
+      Vehiculos.PREND_APAG,
+      Vehiculos.GPS_SERIAL,
+      Vehiculos.CEL_SERIAL,
+      Vehiculos.CEL_NUMERO,
       TiposVehiculos.NOMBRE.label('type_name'),
       Estados.NOMBRE.label('status_name'),
       Propietarios.NOMBRE.label('owner_name'),
@@ -127,11 +132,18 @@ async def all_vehicles(pagination: VehiclePagination, db: Session):
         'id': vehicle.ID,
         'plate': vehicle.PLACA, 
         'owner_id': vehicle.ID_PROPIE,
-        'owner_name': vehicle.owner_name if vehicle.owner_name else None,
+        'owner_name': vehicle.owner_name if vehicle.owner_name else '',
         'type_id': vehicle.ID_TIPOVEH,
-        'type_name': vehicle.type_name if vehicle.type_name else None,
+        'type_name': vehicle.type_name if vehicle.type_name else '',
         'status_id': vehicle.ID_ESTADO,
-        'status_name': vehicle.status_name if vehicle.status_name else None,
+        'status_name': vehicle.status_name if vehicle.status_name else '',
+        'payment_plan': 'Quincenal' if vehicle.PLANPAGO == 1 else 'Mensual' if vehicle.PLANPAGO == 2 else 'Anual' if vehicle.PLANPAGO == 3 else 'No definido',
+        'cuoadmon': vehicle.CUO_ADMON if vehicle.CUO_ADMON else '',
+        'installation_method': 'Rastreo' if vehicle.FORMAINSTA == 1 else 'Corta Corriente' if vehicle.FORMAINSTA == 2 else 'Bomba Gasolina' if vehicle.FORMAINSTA == 3 else 'Ninguno',
+        'gps_status': 'Prendido' if vehicle.PREND_APAG == 1 else 'Apagado',
+        'gps_serial': vehicle.GPS_SERIAL if vehicle.GPS_SERIAL else '',
+        'cel_serial': vehicle.CEL_SERIAL if vehicle.CEL_SERIAL else '',
+        'cel_num': vehicle.CEL_NUMERO if vehicle.CEL_NUMERO else '',
       } for vehicle in query
     ]
 
