@@ -52,7 +52,7 @@ export class DetailsDialogComponent implements OnInit {
   loadDetails() {
     this.isLoading.set(true);
     this.apiService
-      .get<InspectionDetails>(`/inspections/details/${this.data.id}/`)
+      .get<InspectionDetails>(`/inspections/details/${this.data.id}`)
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
         next: (res) => {

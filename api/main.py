@@ -5,12 +5,15 @@ from routes.vehicles import vehicles_router
 from routes.owners import owners_router
 from routes.inspections import inspections_router
 from routes.users import users_router
+from routes.uploads import uploads_router
 from security.deps import get_current_user
-from fastapi.staticfiles import StaticFiles
-import os
+import traceback
+from fastapi import Request
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 
 app = FastAPI()
-# app = FastAPI(root_path="/api", docs_url=None, redoc_url=None, openapi_url=None)
+# app = FastAPI(root_path="/api-gps", docs_url=None, redoc_url=None, openapi_url=None)
 
 # CORS configuration
 app.add_middleware(
@@ -21,14 +24,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+  print(f"Error de validación en {request.url}: {exc.errors()}")
+  return JSONResponse(
+      status_code=422,
+      content={"message": "Error de validación", "details": exc.errors()},
+  )
+
+# @app.exception_handler(Exception)
+# async def global_exception_handler(request: Request, exc: Exception):
+#     print(f"Error 500 crítico en {request.url}:")
+#     traceback.print_exc()
+    
+#     return JSONResponse(
+#         status_code=500,
+#         content={
+#             "message": "Error interno del servidor",
+#             "error_type": type(exc).__name__,
+#             "details": str(exc)
+#         },
+#     )
+
 app.include_router(login_router, prefix="/users")
+app.include_router(uploads_router, prefix="/uploads")
 app.include_router(users_router, prefix="/users", dependencies=[Depends(get_current_user)])
 app.include_router(vehicles_router, prefix="/vehicles", dependencies=[Depends(get_current_user)])
 app.include_router(owners_router, prefix="/owners", dependencies=[Depends(get_current_user)])
 app.include_router(inspections_router, prefix="/inspections", dependencies=[Depends(get_current_user)])
-
-UPLOADS_DIR = os.getenv('DIRECTORY_DOC')
-app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 @app.get("/", dependencies=[Depends(get_current_user)])
 def main():

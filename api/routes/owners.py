@@ -6,11 +6,11 @@ from schemas.owner import *
 
 owners_router = APIRouter()
 
-@owners_router.get('/', tags=["Owners"])
+@owners_router.get('', tags=["Owners"])
 async def get_owners(db: Session = Depends(get_db)):
   return await owners_list(db)
 
-@owners_router.get('/all/', tags=["Owners"])
+@owners_router.get('/all', tags=["Owners"])
 async def get_all_owners(pagination: OwnerPagination = Depends(), db: Session = Depends(get_db)):
   return await all_owners(pagination, db)
 

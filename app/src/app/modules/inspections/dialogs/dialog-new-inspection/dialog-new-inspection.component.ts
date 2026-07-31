@@ -187,7 +187,7 @@ export class DialogNewInspectionComponent implements OnInit {
   loadVehicles() {
     this.isLoadingVehicles.set(true);
     this.apiService
-      .post<Vehicle[]>('/vehicles/vehicles-per-owner/', {})
+      .post<Vehicle[]>('/vehicles/vehicles-per-owner', {})
       .pipe(finalize(() => this.isLoadingVehicles.set(false)))
       .subscribe({
         next: (data) => {
@@ -201,7 +201,7 @@ export class DialogNewInspectionComponent implements OnInit {
 
   loadInspectionTypes() {
     this.apiService
-      .get<{ id: number; name: string }[]>('/inspections/inspections-types/')
+      .get<{ id: number; name: string }[]>('/inspections/inspections-types')
       .subscribe({
         next: (data) => {
           this.inspectionTypes.set(data || []);
@@ -296,7 +296,7 @@ export class DialogNewInspectionComponent implements OnInit {
 
     if (this.isEditing()) {
       this.apiService
-        .put<{ message: string }>(`/inspections/update/${this.inspectionId()}/`, payload)
+        .put<{ message: string }>(`/inspections/update/${this.inspectionId()}`, payload)
         .subscribe({
           next: (res) => {
             this.snackbarService.openSnackBar('Se ha actualizado la inspección correctamente.');
@@ -311,7 +311,7 @@ export class DialogNewInspectionComponent implements OnInit {
           },
         });
     } else {
-      this.apiService.post<{ id: number }>('/inspections/create-inspection/', payload).subscribe({
+      this.apiService.post<{ id: number }>('/inspections/create-inspection', payload).subscribe({
         next: (res) => {
           if (res && res.id) {
             this.inspectionId.set(res.id);
@@ -352,7 +352,7 @@ export class DialogNewInspectionComponent implements OnInit {
     // Llamamos al endpoint de cargar imágenes
     const id = this.inspectionId()!;
     this.apiService
-      .postFormData<{ message: string }>(`/inspections/upload-images/${id}/`, formData)
+      .postFormData<{ message: string }>(`/inspections/upload-images/${id}`, formData)
       .subscribe({
         next: (res) => {
           console.log('Images uploaded successfully:', res.message);
@@ -395,7 +395,7 @@ export class DialogNewInspectionComponent implements OnInit {
 
     const id = this.inspectionId()!;
     this.apiService
-      .postFormData<{ message: string }>(`/inspections/upload-signature/${id}/`, formData)
+      .postFormData<{ message: string }>(`/inspections/upload-signature/${id}`, formData)
       .subscribe({
         next: (res) => {
           console.log('Signature uploaded successfully:', res.message);

@@ -47,7 +47,7 @@ export class TableInspectionsComponent implements OnInit {
   isGeneratingReport = signal<boolean>(false);
   loadingTitle = signal<string>('Cargando Sistema');
   loadingMessage = signal<string>(
-    'Estamos preparando la información de las inspecciones. Por favor, espera un momento.'
+    'Estamos preparando la información de las inspecciones. Por favor, espera un momento.',
   );
 
   displayedColumns: string[] = [
@@ -161,7 +161,7 @@ export class TableInspectionsComponent implements OnInit {
   }
 
   private loadVehicles(ownerId: string | null = null): void {
-    const endpoint = `/vehicles/vehicles-per-owner/${ownerId ? `?owner_id=${ownerId}` : ''}`;
+    const endpoint = `/vehicles/vehicles-per-owner${ownerId ? `/?owner_id=${ownerId}` : ''}`;
     this.apiService.post<Vehicle[]>(endpoint, {}).subscribe({
       next: (data) => {
         this.vehicles.set(data || []);
@@ -185,7 +185,7 @@ export class TableInspectionsComponent implements OnInit {
       this.isLoading.set(true);
     }
     this.apiService
-      .post<Inspection[]>('/inspections/list/', filters)
+      .post<Inspection[]>('/inspections/list', filters)
       .pipe(
         finalize(() => {
           this.isLoading.set(false);
@@ -336,7 +336,7 @@ export class TableInspectionsComponent implements OnInit {
   private reloadTable() {
     this.loadingTitle.set('Cargando Sistema');
     this.loadingMessage.set(
-      'Estamos preparando la información de las inspecciones. Por favor, espera un momento.'
+      'Estamos preparando la información de las inspecciones. Por favor, espera un momento.',
     );
     // Reiniciamos el componente
     this.isInitialLoading.set(true);
@@ -396,26 +396,35 @@ export class TableInspectionsComponent implements OnInit {
   }
 
   generateInspectionReport(row: Inspection) {
+    const pdfWindow = window.open('about:blank', '_blank');
+
     this.loadingTitle.set('Generando Reporte');
     this.loadingMessage.set(
-      'Estamos procesando el documento PDF de la inspección. Por favor, espera un momento.'
+      'Estamos procesando el documento PDF de la inspección. Por favor, espera un momento.',
     );
     this.isGeneratingReport.set(true);
 
     this.apiService
-      .get<{ inspection_pdf: string }>(`/inspections/generate-pdf/${row.id}/`)
+      .get<{ inspection_pdf: string }>(`/inspections/generate-pdf/${row.id}`)
       .pipe(
         finalize(() => {
           this.isGeneratingReport.set(false);
-        })
+        }),
       )
       .subscribe({
         next: (res) => {
           if (res && res.inspection_pdf) {
-            window.open(res.inspection_pdf, '_blank');
+            if (pdfWindow) {
+              pdfWindow.location.href = res.inspection_pdf;
+            } else {
+              window.location.href = res.inspection_pdf;
+            }
+          } else {
+            pdfWindow?.close();
           }
         },
         error: (error) => {
+          pdfWindow?.close();
           console.error('Error generating report:', error);
         },
       });
@@ -436,26 +445,35 @@ export class TableInspectionsComponent implements OnInit {
       filters.final_date = this.range.value.end.toISOString().split('T')[0];
     }
 
+    const pdfWindow = window.open('about:blank', '_blank');
+
     this.loadingTitle.set('Generando Reporte General');
     this.loadingMessage.set(
-      'Estamos procesando el reporte general de inspecciones. Por favor, espera un momento.'
+      'Estamos procesando el reporte general de inspecciones. Por favor, espera un momento.',
     );
     this.isGeneratingReport.set(true);
 
     this.apiService
-      .post<{ inspection_pdf: string }>('/inspections/generate-general-pdf/', filters)
+      .post<{ inspection_pdf: string }>('/inspections/generate-general-pdf', filters)
       .pipe(
         finalize(() => {
           this.isGeneratingReport.set(false);
-        })
+        }),
       )
       .subscribe({
         next: (res) => {
           if (res && res.inspection_pdf) {
-            window.open(res.inspection_pdf, '_blank');
+            if (pdfWindow) {
+              pdfWindow.location.href = res.inspection_pdf;
+            } else {
+              window.location.href = res.inspection_pdf;
+            }
+          } else {
+            pdfWindow?.close();
           }
         },
         error: (error) => {
+          pdfWindow?.close();
           console.error('Error generating general report:', error);
         },
       });

@@ -242,10 +242,10 @@ async def inspections_list(data: InspectionInfo, db: Session, current_user: dict
         photo_field = f"FOTO{i:02d}"
         photo_value = getattr(inspection, photo_field, "")
         if photo_value and photo_value.strip(): 
-          photo_url = f"{route_api}uploads/vehicles/{photo_value}"
+          photo_url = f"{route_api}uploads/{photo_value}"
           photos.append(photo_url)
 
-      signature_url = f"{route_api}uploads/vehicles/{inspection.FIRMA}" if inspection.FIRMA and inspection.FIRMA.strip() else ''
+      signature_url = f"{route_api}uploads/{inspection.FIRMA}" if inspection.FIRMA and inspection.FIRMA.strip() else ''
 
       can_edit = 1 if (inspection.ESTADO == "PEN" and current_user.get("codigo") and str(inspection.USUARIO) == current_user.get("codigo")) else 0
 
@@ -307,7 +307,7 @@ async def inspection_details(inspection_id: int, db: Session):
       photo_field = f"FOTO{i:02d}"
       photo_value = getattr(inspection, photo_field, "")
       if photo_value and photo_value.strip(): 
-        photo_url = f"{route_api}uploads/vehicles/{photo_value}"
+        photo_url = f"{route_api}uploads/{photo_value}"
         photos.append(photo_url)
 
     user = db.query(Usuarios).filter(Usuarios.ID == str(inspection.USUARIO)).first()
@@ -394,10 +394,10 @@ async def inspection_report(inspection_id: int, db: Session, current_user: dict)
       photo_field = f"FOTO{i:02d}"
       photo_value = getattr(inspection, photo_field, "")
       if photo_value and photo_value.strip(): 
-        photo_url = f"{route_api}uploads/vehicles/{photo_value}"
+        photo_url = f"{route_api}uploads/{photo_value}"
         photos.append(photo_url)
 
-    signature_url = f"{route_api}uploads/vehicles/{inspection.FIRMA}" if inspection.FIRMA and inspection.FIRMA.strip() else ''
+    signature_url = f"{route_api}uploads/{inspection.FIRMA}" if inspection.FIRMA and inspection.FIRMA.strip() else ''
     
     inspection_data = {
       "id": inspection.ID,

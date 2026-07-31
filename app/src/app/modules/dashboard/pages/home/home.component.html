@@ -9,39 +9,51 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
     @for (option of menuOptions; track option.title) {
       <div
-        class="group relative overflow-hidden bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between p-6 md:p-8 h-auto min-h-48 md:h-48"
-        [routerLink]="option.route"
-        [class]="option.borderColor"
+        class="group relative overflow-hidden rounded-2xl border transition-all duration-300 flex flex-col justify-between p-6 md:p-8 h-auto min-h-48 md:h-48"
+        [ngClass]="
+          option.disabled
+            ? 'bg-slate-100/70 border-slate-200 cursor-not-allowed opacity-75 grayscale'
+            : 'bg-white border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 cursor-pointer ' +
+              option.borderColor
+        "
+        [routerLink]="option.disabled ? null : option.route"
+        [matTooltip]="option.disabled ? option.tooltip || '¡Próximamente!' : ''"
       >
         <mat-icon
-          class="absolute -right-6 -bottom-6 w-40! h-40! text-[160px]! opacity-[0.03] group-hover:opacity-[0.1] transition-opacity rotate-12 select-none pointer-events-none text-slate-900"
+          class="absolute -right-6 -bottom-6 w-40! h-40! text-[160px]! opacity-[0.03] transition-opacity rotate-12 select-none pointer-events-none text-slate-900"
+          [class.group-hover:opacity-\[0.1\]]="!option.disabled"
         >
           {{ option.icon }}
         </mat-icon>
 
         <div class="flex items-start justify-between relative z-10">
           <div
-            [class]="
-              'w-14 h-14 rounded-xl flex items-center justify-center transition-colors duration-300 ' +
-              option.colorClass
-            "
+            class="w-14 h-14 rounded-xl flex items-center justify-center transition-colors duration-300"
+            [ngClass]="option.disabled ? 'bg-slate-200 text-slate-400' : option.colorClass"
           >
             <mat-icon class="scale-125">{{ option.icon }}</mat-icon>
           </div>
 
           <mat-icon
-            class="text-slate-300 group-hover:translate-x-1 transition-transform duration-300"
-            >arrow_forward</mat-icon
+            class="text-slate-300 transition-transform duration-300"
+            [class.group-hover:translate-x-1]="!option.disabled"
+            >{{ option.disabled ? 'lock' : 'arrow_forward' }}</mat-icon
           >
         </div>
 
         <div class="relative z-10 mt-6 md:mt-4">
           <h3
-            class="text-xl font-bold text-slate-800 mb-1 group-hover:text-primary-600 transition-colors"
+            class="text-xl font-bold mb-1 transition-colors"
+            [ngClass]="
+              option.disabled ? 'text-slate-400' : 'text-slate-800 group-hover:text-primary-600'
+            "
           >
             {{ option.title }}
           </h3>
-          <p class="text-slate-500 text-sm font-medium leading-relaxed max-w-[95%] md:max-w-[85%]">
+          <p
+            class="text-sm font-medium leading-relaxed max-w-[95%] md:max-w-[85%]"
+            [ngClass]="option.disabled ? 'text-slate-400' : 'text-slate-500'"
+          >
             {{ option.description }}
           </p>
         </div>
