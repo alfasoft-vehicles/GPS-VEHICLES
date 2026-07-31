@@ -81,11 +81,11 @@ async def all_owners(pagination: OwnerPagination, db: Session):
 async def owner_info(owner_id: str, db: Session):
   try:
     owner = db.query(
-      Propietarios.ID, Propietarios.NOMBRE, Propietarios.RUC, Propietarios.ID_CIUDAD,
-      Propietarios.DIRECCION, Propietarios.TELEFONO, Propietarios.TELEFONO1, Propietarios.CONTACTO,
-      Propietarios.REP_LEGAL, Propietarios.CORREO, Propietarios.CORREO1, Propietarios.PLANPAGO,
-      Propietarios.FEC_FACTUR, Propietarios.VLR_ADMON, Propietarios.IVA, Propietarios.DESCUENTO,
-      Propietarios.LISTA, Propietarios.ESTADO, Propietarios.FEC_ESTADO, Propietarios.OBSERVA,
+      Propietarios.ID, Propietarios.NOMBRE, Propietarios.RUC, Propietarios.ID_CIUDAD, Propietarios.DIRECCION,
+      Propietarios.TELEFONO, Propietarios.TELEFONO1, Propietarios.CONTACTO, Propietarios.REP_LEGAL,
+      Propietarios.CORREO, Propietarios.CORREO1, Propietarios.PLANPAGO, Propietarios.FEC_FACTUR, Propietarios.LISTA, 
+      Propietarios.VLR_ADMON, Propietarios.IVA, Propietarios.DESCUENTO, Propietarios.ESTADO,
+      Propietarios.FEC_ESTADO, Propietarios.ID_USUARIO, Propietarios.NOMUSUARIO, Propietarios.OBSERVA,
       Ciudades.NOMBRE.label('city_name')
     ).join(Ciudades, Propietarios.ID_CIUDAD == Ciudades.ID
     ).filter(Propietarios.ID == owner_id).first()
@@ -109,12 +109,13 @@ async def owner_info(owner_id: str, db: Session):
       'payment_plan': 'Quincenal' if owner.PLANPAGO == 1 else 'Mensual' if owner.PLANPAGO == 2 else 'Anual' if owner.PLANPAGO == 3 else '',
       'invoice_date': owner.FEC_FACTUR if owner.FEC_FACTUR else '',
       'admon_value': owner.VLR_ADMON,
-      'ITBMS': owner.IVA, #? Confirmar si es este
+      'ITBMS': owner.IVA,
       'discount': owner.DESCUENTO,
       'prices_list': 'Venta' if owner.LISTA == 1 else 'Costo' if owner.LISTA == 2 else '',
       'status': 'Activo' if owner.ESTADO == 1 else 'Suspendido' if owner.ESTADO == 2 else 'Retirado' if owner.ESTADO == 3 else '',
       'status_date': owner.FEC_ESTADO if owner.FEC_ESTADO else '',
-      'auditor': '', #? Confirmar cuál es el campo para auditor
+      'auditor_id': owner.ID_USUARIO,
+      'auditor_name': owner.NOMUSUARIO,
       'notes': owner.OBSERVA
     }
 
