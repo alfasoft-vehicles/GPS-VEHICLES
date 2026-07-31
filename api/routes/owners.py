@@ -10,8 +10,8 @@ owners_router = APIRouter()
 async def get_owners(db: Session = Depends(get_db)):
   return await owners_list(db)
 
-@owners_router.post('/all/', tags=["Owners"])
-async def post_all_owners(pagination: OwnerPagination, db: Session = Depends(get_db)):
+@owners_router.get('/all/', tags=["Owners"])
+async def get_all_owners(pagination: OwnerPagination = Depends(), db: Session = Depends(get_db)):
   return await all_owners(pagination, db)
 
 @owners_router.get('/info/{owner_id}', tags=["Owners"])
