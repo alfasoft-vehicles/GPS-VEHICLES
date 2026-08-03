@@ -12,7 +12,6 @@ interface InspectionDetails {
   owner: string;
   owner_name: string;
   inspection_type: string;
-  instalation_type: string;
   vehicle_id: string;
   plate: string;
   vehicle_status: string;

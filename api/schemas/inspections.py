@@ -10,7 +10,6 @@ class NewInspection(BaseModel):
   celular_serial: str
   description: str
   notes: Optional[str]
-  instalation_type: str
 
 class InspectionInfo(BaseModel):
   owner: Optional[str] = None

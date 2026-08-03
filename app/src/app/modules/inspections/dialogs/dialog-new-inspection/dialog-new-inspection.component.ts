@@ -291,7 +291,6 @@ export class DialogNewInspectionComponent implements OnInit {
       celular_serial: formValue.celular_serial || '',
       description: formValue.description || '',
       notes: formValue.notes || '',
-      instalation_type: this.selectedInspectionType() || '',
     };
 
     if (this.isEditing()) {

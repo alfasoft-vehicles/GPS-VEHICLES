@@ -82,7 +82,6 @@ async def create_inspection(data: NewInspection, db: Session, current_user: dict
       NOMPROPI=owner.NOMBRE,
       TIPO_INSPEC=inspection_type.ID,
       NOMINSPEC=inspection_type.NOMBRE,
-      TIPO_INSTALACION=data.instalation_type,
       KILOMETRAJ=data.mileage,
       GPS_SERIAL=data.gps_serial,
       CEL_NUMERO=data.celular_number,
@@ -319,7 +318,6 @@ async def inspection_details(inspection_id: int, db: Session):
       "owner": inspection.PROPIETARIO,
       "owner_name": owner.NOMBRE,
       "inspection_type": inspection.TIPO_INSPEC + ' - ' + inspection_type.NOMBRE,
-      "instalation_type": inspection.TIPO_INSTALACION,
       "vehicle_id": inspection.ID_VEHICULO,
       "plate": vehicle.PLACA,
       "vehicle_status": vehicle_status,
@@ -356,7 +354,6 @@ async def update_inspection(inspection_id: int, data: NewInspection, db: Session
 
     inspection.TIPO_INSPEC = inspection_type.ID
     inspection.NOMINSPEC = inspection_type.NOMBRE
-    inspection.TIPO_INSTALACION = data.instalation_type
     inspection.KILOMETRAJ = data.mileage
     inspection.GPS_SERIAL = data.gps_serial
     inspection.CEL_NUMERO = data.celular_number
@@ -406,7 +403,6 @@ async def inspection_report(inspection_id: int, db: Session, current_user: dict)
       "owner": inspection.PROPIETARIO,
       "owner_name": inspection.NOMPROPI,
       "inspection_type": inspection.TIPO_INSPEC + ' - ' + inspection_type.NOMBRE if inspection_type else "",
-      "instalation_type": inspection.TIPO_INSTALACION,
       "vehicle_id": inspection.ID_VEHICULO,
       "plate": vehicle.PLACA,
       "vehicle_status": vehicle_status,

@@ -13,7 +13,6 @@ class Inspecciones(Base):
   NOMPROPI = Column(CHAR(50))
   TIPO_INSPEC = Column(CHAR(2))
   NOMINSPEC = Column(CHAR(30))
-  TIPO_INSTALACION = Column(CHAR(50))
   KILOMETRAJ = Column(Integer)
   GPS_SERIAL = Column(CHAR(25))
   CEL_NUMERO = Column(CHAR(12))
