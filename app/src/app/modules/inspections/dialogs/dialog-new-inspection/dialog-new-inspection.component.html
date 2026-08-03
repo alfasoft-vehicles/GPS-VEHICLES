@@ -281,7 +281,13 @@
                 class="w-full compact-form-field"
               >
                 <mat-label>Kilometraje</mat-label>
-                <input matInput type="number" formControlName="mileage" placeholder="Ej. 90827" />
+                <input
+                  matInput
+                  type="number"
+                  min="0"
+                  formControlName="mileage"
+                  placeholder="Ej. 90827"
+                />
                 <span matTextSuffix class="text-slate-400 text-sm mr-2 font-medium">km</span>
                 <mat-icon matSuffix class="text-slate-400 scale-90">speed</mat-icon>
               </mat-form-field>
@@ -435,7 +441,7 @@
 
       <button
         mat-stroked-button
-        mat-dialog-close
+        (click)="closeDialog()"
         class="rounded-lg h-10 px-6 border-slate-300! text-slate-600!"
       >
         Cancelar

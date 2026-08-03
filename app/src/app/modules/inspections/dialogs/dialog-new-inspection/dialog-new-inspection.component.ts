@@ -166,7 +166,7 @@ export class DialogNewInspectionComponent implements OnInit {
           );
 
           this.inspectionForm.patchValue({
-            mileage: Number(res.mileage),
+            mileage: Math.max(0, Number(res.mileage)),
             gps_serial: res.gps_serial,
             celular_number: res.celular_number,
             celular_serial: res.celular_serial,
@@ -255,7 +255,7 @@ export class DialogNewInspectionComponent implements OnInit {
   }
 
   closeDialog() {
-    this.dialogRef.close(this.dataSaved());
+    this.dialogRef.close(this.dataSaved() || !!this.inspectionId());
   }
 
   nextStep() {
@@ -290,7 +290,7 @@ export class DialogNewInspectionComponent implements OnInit {
     const payload = {
       vehicle_id: String(vehicle.id),
       inspection_type_id: inspection_type_id,
-      mileage: Number(formValue.mileage),
+      mileage: Math.max(0, Number(formValue.mileage)),
       gps_serial: formValue.gps_serial || '',
       celular_number: formValue.celular_number || '',
       celular_serial: formValue.celular_serial || '',
@@ -320,6 +320,7 @@ export class DialogNewInspectionComponent implements OnInit {
         next: (res) => {
           if (res && res.id) {
             this.inspectionId.set(res.id);
+            this.dataSaved.set(true);
             this.snackbarService.openSnackBar('Se ha creado la inspección correctamente.');
             this.currentStep.set(4); // Avanzamos al Paso 4 (Cámara)
           }
