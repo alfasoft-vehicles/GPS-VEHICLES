@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte de Inspección</title>
+    <title>Control Inspecciones de GPS</title>
     <style>
       body {
         font-family: 'Inter', 'Segoe UI', sans-serif;
@@ -281,7 +281,7 @@
         <tr>
           <td>
             <div class="detalle-item">
-              <span class="detalle-label">Propietario</span>
+              <span class="detalle-label">Cliente</span>
               <span class="detalle-valor">{{ data_view.inspection.owner_name if data_view.inspection.owner_name else '&nbsp;' }}</span>
             </div>
           </td>
@@ -309,6 +309,12 @@
         <tr>
           <td>
             <div class="detalle-item">
+              <span class="detalle-label">Forma de Instalación</span>
+              <span class="detalle-valor">{{ data_view.inspection.installation_way if data_view.inspection.installation_way else '&nbsp;' }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="detalle-item">
               <span class="detalle-label">Serial GPS</span>
               <span class="detalle-valor">{{ data_view.inspection.gps_serial if data_view.inspection.gps_serial else '&nbsp;' }}</span>
             </div>
@@ -332,7 +338,7 @@
           <td>
             <div class="detalle-item">
               <span class="detalle-label">Inspección realizada por</span>
-              <span class="detalle-valor">{{ data_view.inspection.user if data_view.inspection.user else '&nbsp;' }}</span>
+              <span class="detalle-valor">{{ data_view.inspection.inspection_user if data_view.inspection.inspection_user else '&nbsp;' }}</span>
             </div>
           </td>
           <td>

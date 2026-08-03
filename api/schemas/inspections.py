@@ -8,6 +8,7 @@ class NewInspection(BaseModel):
   gps_serial: str
   celular_number: str
   celular_serial: str
+  installation_way: str
   description: str
   notes: Optional[str]
 

@@ -86,6 +86,7 @@ async def create_inspection(data: NewInspection, db: Session, current_user: dict
       GPS_SERIAL=data.gps_serial,
       CEL_NUMERO=data.celular_number,
       CEL_SERIAL=data.celular_serial,
+      FORMA_INSTALACION=data.installation_way,
       DESCRIPCION=data.description,
       OBSERVA=data.notes if data.notes else "",
       USUARIO=user.ID if user else "",
@@ -325,6 +326,7 @@ async def inspection_details(inspection_id: int, db: Session):
       "gps_serial": inspection.GPS_SERIAL if inspection.GPS_SERIAL else "",
       "celular_number": inspection.CEL_NUMERO if inspection.CEL_NUMERO else "",
       "celular_serial": inspection.CEL_SERIAL if inspection.CEL_SERIAL else "",
+      "installation_way": inspection.FORMA_INSTALACION if inspection.FORMA_INSTALACION else "",
       "description": inspection.DESCRIPCION,
       "notes": inspection.OBSERVA if inspection.OBSERVA else "",
       "status": inspection.ESTADO,
@@ -358,6 +360,7 @@ async def update_inspection(inspection_id: int, data: NewInspection, db: Session
     inspection.GPS_SERIAL = data.gps_serial
     inspection.CEL_NUMERO = data.celular_number
     inspection.CEL_SERIAL = data.celular_serial
+    inspection.FORMA_INSTALACION = data.installation_way
     inspection.DESCRIPCION = data.description
     inspection.OBSERVA = data.notes if data.notes else ""
 
@@ -410,6 +413,7 @@ async def inspection_report(inspection_id: int, db: Session, current_user: dict)
       "gps_serial": inspection.GPS_SERIAL if inspection.GPS_SERIAL else "",
       "celular_number": inspection.CEL_NUMERO if inspection.CEL_NUMERO else "",
       "celular_serial": inspection.CEL_SERIAL if inspection.CEL_SERIAL else "",
+      "installation_way": inspection.FORMA_INSTALACION if inspection.FORMA_INSTALACION else "",
       "description": inspection.DESCRIPCION,
       "notes": inspection.OBSERVA if inspection.OBSERVA else "",
       "status": inspection.ESTADO,

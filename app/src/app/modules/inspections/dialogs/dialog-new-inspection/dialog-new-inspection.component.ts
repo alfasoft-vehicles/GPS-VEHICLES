@@ -33,12 +33,16 @@ export class DialogNewInspectionComponent implements OnInit {
   selectedInspectionType = signal<string | null>(null);
   inspectionTypes = signal<{ id: number; name: string }[]>([]);
 
+  // Opciones para Forma de Instalación
+  installationWays = signal<string[]>(['Rastreo', 'Corta Corriente', 'Bomba Gasolina', 'Ninguno']);
+
   // Formulario de inspección (Paso 2)
   inspectionForm = new FormGroup({
     mileage: new FormControl<number | null>(null, [Validators.min(0)]),
     gps_serial: new FormControl<string>('', [Validators.required]),
     celular_number: new FormControl<string>('', [Validators.required]),
     celular_serial: new FormControl<string>('', [Validators.required]),
+    installation_way: new FormControl<string>('', [Validators.required]),
     description: new FormControl<string>('', [Validators.required]),
     notes: new FormControl<string>(''),
   });
@@ -166,6 +170,7 @@ export class DialogNewInspectionComponent implements OnInit {
             gps_serial: res.gps_serial,
             celular_number: res.celular_number,
             celular_serial: res.celular_serial,
+            installation_way: res.installation_way || res.installation_mode || '',
             description: res.description,
             notes: res.notes,
           });
@@ -289,6 +294,7 @@ export class DialogNewInspectionComponent implements OnInit {
       gps_serial: formValue.gps_serial || '',
       celular_number: formValue.celular_number || '',
       celular_serial: formValue.celular_serial || '',
+      installation_way: formValue.installation_way || '',
       description: formValue.description || '',
       notes: formValue.notes || '',
     };

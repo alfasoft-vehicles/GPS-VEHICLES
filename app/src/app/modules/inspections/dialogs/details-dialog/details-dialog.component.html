@@ -259,6 +259,18 @@
                 }}</span>
               </div>
 
+              @if (inspectionData()?.installation_way) {
+                <div class="md:col-span-2">
+                  <span
+                    class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1"
+                    >Forma de Instalación</span
+                  >
+                  <span class="block text-sm font-semibold text-slate-800">{{
+                    inspectionData()?.installation_way
+                  }}</span>
+                </div>
+              }
+
               <div class="md:col-span-2">
                 <span
                   class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1"

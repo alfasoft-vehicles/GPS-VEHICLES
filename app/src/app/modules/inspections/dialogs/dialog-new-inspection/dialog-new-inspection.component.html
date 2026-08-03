@@ -328,6 +328,20 @@
               <mat-form-field
                 appearance="fill"
                 subscriptSizing="dynamic"
+                class="w-full compact-form-field sm:col-span-2"
+              >
+                <mat-label>Forma de Instalación</mat-label>
+                <mat-select formControlName="installation_way">
+                  @for (way of installationWays(); track way) {
+                    <mat-option [value]="way">{{ way }}</mat-option>
+                  }
+                </mat-select>
+                <mat-icon matSuffix class="text-slate-400 scale-90">build</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field
+                appearance="fill"
+                subscriptSizing="dynamic"
                 class="w-full sm:col-span-2 is-textarea"
               >
                 <mat-label>Descripción</mat-label>

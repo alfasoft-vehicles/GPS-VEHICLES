@@ -19,6 +19,7 @@ interface InspectionDetails {
   gps_serial: string;
   celular_number: string;
   celular_serial: string;
+  installation_way: string;
   description: string;
   notes: string;
   status: string;

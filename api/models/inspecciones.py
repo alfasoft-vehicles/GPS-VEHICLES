@@ -17,6 +17,7 @@ class Inspecciones(Base):
   GPS_SERIAL = Column(CHAR(25))
   CEL_NUMERO = Column(CHAR(12))
   CEL_SERIAL = Column(CHAR(25))
+  FORMA_INSTALACION = Column(CHAR(50))
   DESCRIPCION = Column(Text)
   OBSERVA = Column(Text)
   FOTO01 = Column(VARCHAR(200))
