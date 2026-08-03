@@ -225,7 +225,7 @@ export class DialogNewInspectionComponent implements OnInit {
     this.selectedVehicle.set(vehicle);
 
     // Buscar info detallada por placa
-    this.apiService.post<Vehicle>(`/vehicles/info/?vehicle_plate=${vehicle.plate}`, {}).subscribe({
+    this.apiService.get<Vehicle>(`/vehicles/info/?vehicle_plate=${vehicle.plate}`).subscribe({
       next: (fullInfo) => {
         if (fullInfo) {
           // Combinamos la info previa con la nueva
