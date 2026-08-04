@@ -3,6 +3,8 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from sqlalchemy import cast, Integer
 from models.inventario import Inventarios
+from models.marcas import Marcas
+from models.grupos import Grupos
 from schemas.inventory import *
 
 async def all_stock(pagination: InventoryPagination, db: Session):
@@ -57,6 +59,54 @@ async def all_stock(pagination: InventoryPagination, db: Session):
       'items': items
     }
     
+    return JSONResponse(content=jsonable_encoder(response), status_code=200)
+  except Exception as e:
+    return JSONResponse(content={"error": str(e)}, status_code=500)
+
+# ---------------------------------------------------------------------------------------------------------------
+
+async def item_info(item_id: int, db: Session):
+  try:
+    item = db.query(
+      Inventarios.ID, Inventarios.CODIGO, Inventarios.COD_BARRAS, Inventarios.NOMBRE, Inventarios.PRESENTA, 
+      Inventarios.UBICACION, Inventarios.IVA, Inventarios.EXISTENCIA, Inventarios.COSTO, Inventarios.PR_VENTA, 
+      Inventarios.TOTAL, Inventarios.MINIMO, Inventarios.MAXIMO, Inventarios.CPM, Inventarios.CAN_PEDIR, 
+      Inventarios.EXCLUIR, Inventarios.OBSERVA, Inventarios.ESTADO, Inventarios.FEC_ESTADO,
+      Marcas.ID.label('brand_id'), Marcas.NOMBRE.label('brand_name'),
+      Grupos.ID.label('group_id'), Grupos.NOMBRE.label('group_name')
+    ).outerjoin(Marcas, Inventarios.ID_MARCA == Marcas.ID
+    ).outerjoin(Grupos, Inventarios.ID_GRUPO == Grupos.ID
+    ).filter(Inventarios.ID == item_id).first()
+
+    if not item:
+      return JSONResponse(content={"message": "Item not found"}, status_code=404)
+
+    response = {
+      'id': item.ID,
+      'code': item.CODIGO,
+      'barcode': item.COD_BARRAS,
+      'name': item.NOMBRE,
+      'presentation': item.PRESENTA,
+      'location': item.UBICACION,
+      'group_id': item.group_id if item.group_id else '',
+      'group_name': item.group_name if item.group_name else '',
+      'brand_id': item.brand_id if item.brand_id else '',
+      'brand_name': item.brand_name if item.brand_name else '',
+      'ITBMS': item.IVA,
+      'stock': item.EXISTENCIA,
+      'unit_cost': item.COSTO,
+      'sale_price': item.PR_VENTA,
+      'total_': item.TOTAL,
+      'minimum_stock': item.MINIMO,
+      'maximum_stock': item.MAXIMO,
+      'cpm': item.CPM,
+      'cant_order': item.CAN_PEDIR,
+      'exclude': item.EXCLUIR,
+      'observations': item.OBSERVA,     
+      'status': 'Activo' if item.ESTADO == 1 else 'Suspendido' if item.ESTADO == 2 else 'Retirado' if item.ESTADO == 3 else '',
+      'status_date': item.FEC_ESTADO if item.FEC_ESTADO else '',
+    }
+
     return JSONResponse(content=jsonable_encoder(response), status_code=200)
   except Exception as e:
     return JSONResponse(content={"error": str(e)}, status_code=500)
