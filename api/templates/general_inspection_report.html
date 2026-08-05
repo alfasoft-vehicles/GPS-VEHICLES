@@ -110,7 +110,6 @@
       <tr>
         <th>Id</th>
         <th>Descripción</th>
-        <th>Km</th>
         <th>Placa</th>
         <th>ID Unidad</th>
         <th>Fecha</th>
@@ -125,7 +124,6 @@
       <tr class="data-row">
         <td>{{ inspection['id'] if inspection['id'] else '' }}</td>
         <td>{{ inspection['details'] if inspection['details'] else '' }}</td>
-        <td>{{ inspection['mileage'] if inspection['mileage'] else '' }}</td>
         <td>{{ inspection['plate'] if inspection['plate'] else '' }}</td>
         <td>{{ inspection['vehicle_id'] if inspection['vehicle_id'] else '' }}</td>
         <td>{{ inspection['date'] if inspection['date'] else '' }}</td>
@@ -136,7 +134,7 @@
       {% endfor %}
 
       <tr class="separator-row">
-        <td colspan="9"><div></div></td>
+        <td colspan="8"><div></div></td>
       </tr>
 
       <tr class="total-general-row">

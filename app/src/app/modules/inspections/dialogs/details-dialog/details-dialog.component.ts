@@ -15,7 +15,6 @@ interface InspectionDetails {
   vehicle_id: string;
   plate: string;
   vehicle_status: string;
-  mileage: string | number;
   gps_serial: string;
   celular_number: string;
   celular_serial: string;

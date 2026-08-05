@@ -82,7 +82,6 @@ async def create_inspection(data: NewInspection, db: Session, current_user: dict
       NOMPROPI=owner.NOMBRE,
       TIPO_INSPEC=inspection_type.ID,
       NOMINSPEC=inspection_type.NOMBRE,
-      KILOMETRAJ=data.mileage,
       GPS_SERIAL=data.gps_serial,
       CEL_NUMERO=data.celular_number,
       CEL_SERIAL=data.celular_serial,
@@ -322,7 +321,6 @@ async def inspection_details(inspection_id: int, db: Session):
       "vehicle_id": inspection.ID_VEHICULO,
       "plate": vehicle.PLACA,
       "vehicle_status": vehicle_status,
-      "mileage": inspection.KILOMETRAJ if inspection.KILOMETRAJ else "",
       "gps_serial": inspection.GPS_SERIAL if inspection.GPS_SERIAL else "",
       "celular_number": inspection.CEL_NUMERO if inspection.CEL_NUMERO else "",
       "celular_serial": inspection.CEL_SERIAL if inspection.CEL_SERIAL else "",
@@ -356,7 +354,6 @@ async def update_inspection(inspection_id: int, data: NewInspection, db: Session
 
     inspection.TIPO_INSPEC = inspection_type.ID
     inspection.NOMINSPEC = inspection_type.NOMBRE
-    inspection.KILOMETRAJ = data.mileage
     inspection.GPS_SERIAL = data.gps_serial
     inspection.CEL_NUMERO = data.celular_number
     inspection.CEL_SERIAL = data.celular_serial
@@ -409,7 +406,6 @@ async def inspection_report(inspection_id: int, db: Session, current_user: dict)
       "vehicle_id": inspection.ID_VEHICULO,
       "plate": vehicle.PLACA,
       "vehicle_status": vehicle_status,
-      "mileage": inspection.KILOMETRAJ if inspection.KILOMETRAJ else "",
       "gps_serial": inspection.GPS_SERIAL if inspection.GPS_SERIAL else "",
       "celular_number": inspection.CEL_NUMERO if inspection.CEL_NUMERO else "",
       "celular_serial": inspection.CEL_SERIAL if inspection.CEL_SERIAL else "",
@@ -427,7 +423,7 @@ async def inspection_report(inspection_id: int, db: Session, current_user: dict)
     date = now_in_panama.strftime("%d/%m/%Y")
     hour = now_in_panama.strftime("%I:%M:%S %p")
 
-    title = 'Inspección de Vehículo'
+    title = 'Control Inspecciones de GPS'
     data_view = {
       'inspection': inspection_data,
       'date': date,
@@ -546,7 +542,6 @@ async def general_inspections_report(data: InspectionInfo, db: Session, current_
         "details": inspection.DESCRIPCION,
         "vehicle_id": inspection.ID_VEHICULO,
         "plate": inspection.PLACA,
-        "mileage": inspection.KILOMETRAJ if inspection.KILOMETRAJ else "",
         "owner_id": inspection.PROPIETARIO,
         "owner_name": owners_dict.get(inspection.PROPIETARIO, ""),
         "status": "FINALIZADA" if inspection.ESTADO == "FIN" else ("PENDIENTE" if inspection.ESTADO == "PEN" else ("SUSPENDIDA" if inspection.ESTADO == "SUS" else inspection.ESTADO)),

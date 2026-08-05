@@ -38,7 +38,6 @@ export class DialogNewInspectionComponent implements OnInit {
 
   // Formulario de inspección (Paso 2)
   inspectionForm = new FormGroup({
-    mileage: new FormControl<number | null>(null, [Validators.min(0)]),
     gps_serial: new FormControl<string>('', [Validators.required]),
     celular_number: new FormControl<string>('', [Validators.required]),
     celular_serial: new FormControl<string>('', [Validators.required]),
@@ -166,7 +165,6 @@ export class DialogNewInspectionComponent implements OnInit {
           );
 
           this.inspectionForm.patchValue({
-            mileage: Math.max(0, Number(res.mileage)),
             gps_serial: res.gps_serial,
             celular_number: res.celular_number,
             celular_serial: res.celular_serial,
@@ -290,7 +288,6 @@ export class DialogNewInspectionComponent implements OnInit {
     const payload = {
       vehicle_id: String(vehicle.id),
       inspection_type_id: inspection_type_id,
-      mileage: Math.max(0, Number(formValue.mileage)),
       gps_serial: formValue.gps_serial || '',
       celular_number: formValue.celular_number || '',
       celular_serial: formValue.celular_serial || '',
