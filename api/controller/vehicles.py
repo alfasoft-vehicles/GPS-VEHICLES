@@ -51,6 +51,7 @@ async def vehicles_per_owner(owner_id: str, db: Session):
 async def vehicle_info(vehicle_plate: str, db: Session):
   try:
     vehicle = db.query(
+      Marcas.ID.label('ID_brand'),
       Marcas.NOMBRE.label('Brand'),
       Colores.NOMBRE.label('Color'),
       TiposVehiculos.NOMBRE.label('Vehicle_type'),
@@ -75,6 +76,7 @@ async def vehicle_info(vehicle_plate: str, db: Session):
       'id': vehicle.ID,
       'plate': vehicle.PLACA, 
       'brand': vehicle.Brand,
+      'gps_brand_id': vehicle.ID_brand,
       'model': vehicle.MODELO,
       'color': vehicle.Color,
       'vehicle_type': vehicle.Vehicle_type,

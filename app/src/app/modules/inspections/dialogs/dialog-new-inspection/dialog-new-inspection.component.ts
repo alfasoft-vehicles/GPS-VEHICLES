@@ -36,8 +36,12 @@ export class DialogNewInspectionComponent implements OnInit {
   // Opciones para Forma de Instalación
   installationWays = signal<string[]>(['Rastreo', 'Corta Corriente', 'Bomba Gasolina', 'Ninguno']);
 
+  // Marcas de GPS
+  gpsBrands = signal<{ id: string; name: string }[]>([]);
+
   // Formulario de inspección (Paso 2)
   inspectionForm = new FormGroup({
+    gps_brand_id: new FormControl<string>('', [Validators.required]),
     gps_serial: new FormControl<string>('', [Validators.required]),
     celular_number: new FormControl<string>('', [Validators.required]),
     celular_serial: new FormControl<string>('', [Validators.required]),
@@ -108,7 +112,7 @@ export class DialogNewInspectionComponent implements OnInit {
     return [
       { label: 'Placa', value: formatValue(vehicle.plate), icon: 'directions_car' },
       { label: 'Propietario', value: formatValue(vehicle.owner_name), icon: 'person' },
-      { label: 'Marca', value: formatValue(vehicle.brand), icon: 'branding_watermark' },
+      { label: 'Marca GPS', value: formatValue(vehicle.brand), icon: 'branding_watermark' },
       { label: 'Serial GPS', value: formatValue(vehicle.gps_serial), icon: 'router' },
       { label: 'Serial Celular', value: formatValue(vehicle.cel_serial), icon: 'sim_card' },
       { label: 'Número Celular', value: formatValue(vehicle.cel_num), icon: 'phone_iphone' },
@@ -142,6 +146,7 @@ export class DialogNewInspectionComponent implements OnInit {
       this.loadVehicles();
     }
     this.loadInspectionTypes();
+    this.loadGpsBrands();
   }
 
   loadInspectionDetails(id: number) {
@@ -165,6 +170,7 @@ export class DialogNewInspectionComponent implements OnInit {
           );
 
           this.inspectionForm.patchValue({
+            gps_brand_id: res.gps_brand_id || '',
             gps_serial: res.gps_serial,
             celular_number: res.celular_number,
             celular_serial: res.celular_serial,
@@ -215,6 +221,17 @@ export class DialogNewInspectionComponent implements OnInit {
       });
   }
 
+  loadGpsBrands() {
+    this.apiService.get<{ id: string; name: string }[]>('/brands/brands-list').subscribe({
+      next: (data) => {
+        this.gpsBrands.set(data || []);
+      },
+      error: (error) => {
+        console.error('Error loading GPS brands:', error);
+      },
+    });
+  }
+
   onSearch(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.searchQuery.set(value);
@@ -224,15 +241,50 @@ export class DialogNewInspectionComponent implements OnInit {
     this.searchQuery.set('');
   }
 
+  private cleanVal(val: any): string {
+    if (
+      !val ||
+      val === 'N/A' ||
+      String(val).trim() === '' ||
+      String(val).trim().toLowerCase() === 'null' ||
+      String(val).trim().toLowerCase() === 'undefined'
+    ) {
+      return '';
+    }
+    return String(val).trim();
+  }
+
+  clearControl(controlName: string) {
+    this.inspectionForm.get(controlName)?.setValue('');
+  }
+
   selectVehicle(vehicle: Vehicle) {
     this.selectedVehicle.set(vehicle);
+
+    if (!this.isEditing()) {
+      this.inspectionForm.patchValue({
+        gps_brand_id: this.cleanVal(vehicle.gps_brand_id || vehicle.brand_id),
+        gps_serial: this.cleanVal(vehicle.gps_serial),
+        celular_number: this.cleanVal(vehicle.cel_num),
+        celular_serial: this.cleanVal(vehicle.cel_serial),
+      });
+    }
 
     // Buscar info detallada por placa
     this.apiService.get<Vehicle>(`/vehicles/info/?vehicle_plate=${vehicle.plate}`).subscribe({
       next: (fullInfo) => {
         if (fullInfo) {
-          // Combinamos la info previa con la nueva
-          this.selectedVehicle.set({ ...vehicle, ...fullInfo });
+          const combined = { ...vehicle, ...fullInfo };
+          this.selectedVehicle.set(combined);
+
+          if (!this.isEditing()) {
+            this.inspectionForm.patchValue({
+              gps_brand_id: this.cleanVal(combined.gps_brand_id || combined.brand_id),
+              gps_serial: this.cleanVal(combined.gps_serial),
+              celular_number: this.cleanVal(combined.cel_num),
+              celular_serial: this.cleanVal(combined.cel_serial),
+            });
+          }
         }
       },
       error: (error) => {
@@ -261,6 +313,19 @@ export class DialogNewInspectionComponent implements OnInit {
     if (this.selectedVehicle() && this.selectedInspectionType()) {
       console.log('Procediendo con vehículo:', this.selectedVehicle()?.plate);
       console.log('Tipo de Inspección:', this.selectedInspectionType());
+
+      if (!this.isEditing()) {
+        const vehicle = this.selectedVehicle()!;
+        const currentVals = this.inspectionForm.value;
+        this.inspectionForm.patchValue({
+          gps_brand_id:
+            currentVals.gps_brand_id || this.cleanVal(vehicle.gps_brand_id || vehicle.brand_id),
+          gps_serial: currentVals.gps_serial || this.cleanVal(vehicle.gps_serial),
+          celular_number: currentVals.celular_number || this.cleanVal(vehicle.cel_num),
+          celular_serial: currentVals.celular_serial || this.cleanVal(vehicle.cel_serial),
+        });
+      }
+
       this.currentStep.set(2);
     }
   }
@@ -288,6 +353,7 @@ export class DialogNewInspectionComponent implements OnInit {
     const payload = {
       vehicle_id: String(vehicle.id),
       inspection_type_id: inspection_type_id,
+      gps_brand_id: formValue.gps_brand_id || '',
       gps_serial: formValue.gps_serial || '',
       celular_number: formValue.celular_number || '',
       celular_serial: formValue.celular_serial || '',
