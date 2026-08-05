@@ -50,18 +50,14 @@ async def vehicles_per_owner(owner_id: str, db: Session):
 
 async def vehicle_info(vehicle_plate: str, db: Session):
   try:
-    vehicle = db.query(
-      Marcas.ID.label('ID_brand'),
+    result = db.query(
+      Vehiculos,
+      Marcas.ID.label('Brand_id'),
       Marcas.NOMBRE.label('Brand'),
       Colores.NOMBRE.label('Color'),
       TiposVehiculos.NOMBRE.label('Vehicle_type'),
-      Vehiculos.ID_PROPIE.label('Owner_id'),
       Propietarios.NOMBRE.label('Owner_name'),
       Estados.NOMBRE.label('Status'),
-      Vehiculos.ID, Vehiculos.PLACA, Vehiculos.MODELO, Vehiculos.FEC_ESTADO, 
-      Vehiculos.PLANPAGO, Vehiculos.CUO_ADMON, Vehiculos.IVA, Vehiculos.FORMAINSTA, 
-      Vehiculos.PREND_APAG, Vehiculos.FEC_PREAPA, Vehiculos.GPS_SERIAL, Vehiculos.CEL_SERIAL,
-      Vehiculos.CEL_NUMERO, Vehiculos.COMENTARIO, Vehiculos.OBSERVA, Vehiculos.FEC_CREADO
     ).outerjoin(Marcas, Vehiculos.ID_MARCA == Marcas.ID)\
      .outerjoin(Colores, Vehiculos.ID_COLOR == Colores.ID)\
      .outerjoin(TiposVehiculos, Vehiculos.ID_TIPOVEH == TiposVehiculos.ID)\
@@ -69,33 +65,44 @@ async def vehicle_info(vehicle_plate: str, db: Session):
      .outerjoin(Estados, Vehiculos.ID_ESTADO == Estados.ID)\
      .filter(Vehiculos.PLACA == vehicle_plate).first()
 
-    if not vehicle:
+    if not result:
       return JSONResponse(content={"message": "No vehicle found"}, status_code=404)
-         
+
+    v, brand_id, brand_name, color_name, vtype_name, owner_name, status_name = result
+
+    plan_pago = getattr(v, 'PLANPAGO', None)
+    payment_plan = 'Quincenal' if plan_pago == 1 else 'Mensual' if plan_pago == 2 else 'Anual' if plan_pago == 3 else 'No definido'
+
+    forma_insta = getattr(v, 'FORMAINSTA', None)
+    installation_method = 'Rastreo' if forma_insta == 1 else 'Corta Corriente' if forma_insta == 2 else 'Bomba Gasolina' if forma_insta == 3 else 'Ninguno'
+
+    prend_apag = getattr(v, 'PREND_APAG', None)
+
     response = {
-      'id': vehicle.ID,
-      'plate': vehicle.PLACA, 
-      'brand': vehicle.Brand,
-      'gps_brand_id': vehicle.ID_brand,
-      'model': vehicle.MODELO,
-      'color': vehicle.Color,
-      'vehicle_type': vehicle.Vehicle_type,
-      'owner_id': vehicle.Owner_id,
-      'owner_name': vehicle.Owner_name,
-      'status': vehicle.Status,
-      'status_date': vehicle.FEC_ESTADO,
-      'payment_plan': 'Quincenal' if vehicle.PLANPAGO == 1 else 'Mensual' if vehicle.PLANPAGO == 2 else 'Anual' if vehicle.PLANPAGO == 3 else 'No definido',
-      'cuo_admon': vehicle.CUO_ADMON,
-      'iva': vehicle.IVA,
-      'installation_method': 'Rastreo' if vehicle.FORMAINSTA == 1 else 'Corta Corriente' if vehicle.FORMAINSTA == 2 else 'Bomba Gasolina' if vehicle.FORMAINSTA == 3 else 'Ninguno',
-      'prend_apag': 'Prendido' if vehicle.PREND_APAG == 1 else 'Apagado',
-      'prend_apag_date': vehicle.FEC_PREAPA,
-      'gps_serial': vehicle.GPS_SERIAL,
-      'cel_serial': vehicle.CEL_SERIAL,
-      'cel_num': vehicle.CEL_NUMERO,
-      'comments': vehicle.COMENTARIO,
-      'observations': vehicle.OBSERVA,
-      'date_created': vehicle.FEC_CREADO
+      'id': getattr(v, 'ID', ''),
+      'plate': getattr(v, 'PLACA', ''),
+      'brand': (brand_name or getattr(v, 'NOMMARCA', '') or '').strip(),
+      'brand_id': (brand_id or getattr(v, 'ID_MARCA', '') or '').strip(),
+      'gps_brand_id': (brand_id or getattr(v, 'ID_MARCA', '') or '').strip(),
+      'model': getattr(v, 'MODELO', ''),
+      'color': (color_name or getattr(v, 'NOMCOLOR', '') or '').strip(),
+      'vehicle_type': (vtype_name or getattr(v, 'NOMTIPOVEH', '') or '').strip(),
+      'owner_id': getattr(v, 'ID_PROPIE', ''),
+      'owner_name': (owner_name or getattr(v, 'NOMPROPIE', '') or '').strip(),
+      'status': (status_name or getattr(v, 'NOMESTADO', '') or '').strip(),
+      'status_date': getattr(v, 'FEC_ESTADO', None),
+      'payment_plan': payment_plan,
+      'cuo_admon': getattr(v, 'CUO_ADMON', 0),
+      'iva': getattr(v, 'IVA', 0),
+      'installation_method': installation_method,
+      'prend_apag': 'Prendido' if prend_apag == 1 else 'Apagado',
+      'prend_apag_date': getattr(v, 'FEC_PREAPA', None),
+      'gps_serial': getattr(v, 'GPS_SERIAL', ''),
+      'cel_serial': getattr(v, 'CEL_SERIAL', ''),
+      'cel_num': getattr(v, 'CEL_NUMERO', ''),
+      'comments': getattr(v, 'COMENTARIO', ''),
+      'observations': getattr(v, 'OBSERVA', ''),
+      'date_created': getattr(v, 'FEC_CREADO', None)
     }
 
     return JSONResponse(content=jsonable_encoder(response), status_code=200)

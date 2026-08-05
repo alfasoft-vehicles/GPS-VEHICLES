@@ -271,7 +271,7 @@ export class DialogNewInspectionComponent implements OnInit {
     }
 
     // Buscar info detallada por placa
-    this.apiService.get<Vehicle>(`/vehicles/info/?vehicle_plate=${vehicle.plate}`).subscribe({
+    this.apiService.get<Vehicle>(`/vehicles/info?vehicle_plate=${vehicle.plate}`).subscribe({
       next: (fullInfo) => {
         if (fullInfo) {
           const combined = { ...vehicle, ...fullInfo };
