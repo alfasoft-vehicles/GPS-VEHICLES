@@ -151,7 +151,7 @@ export class DialogNewInspectionComponent implements OnInit {
 
   loadInspectionDetails(id: number) {
     this.isLoadingVehicles.set(true);
-    this.apiService.get<any>(`/inspections/details/${id}/`).subscribe({
+    this.apiService.get<any>(`/inspections/details/${id}`).subscribe({
       next: (res) => {
         if (res) {
           // Mapeamos los datos de la inspección al formato del vehículo y formulario
