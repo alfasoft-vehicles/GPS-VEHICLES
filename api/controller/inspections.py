@@ -1,4 +1,5 @@
 import uuid
+from pathlib import Path
 
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.encoders import jsonable_encoder
@@ -441,12 +442,14 @@ async def inspection_report(inspection_id: int, db: Session, current_user: dict)
     hour = now_in_panama.strftime("%I:%M:%S %p")
 
     title = 'Control Inspecciones de GPS'
+    logo_path = Path(__file__).resolve().parent.parent / 'assets' / 'LogoEmpresa.jpg'
     data_view = {
       'inspection': inspection_data,
       'date': date,
       'hour': hour,
       'user': user_name.NOMBRE if user_name else "",
-      'title': title
+      'title': title,
+      'logo_url': logo_path.resolve().as_uri()
     }
 
     headers = {

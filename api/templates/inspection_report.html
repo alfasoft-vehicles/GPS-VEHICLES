@@ -172,27 +172,39 @@
       }
 
       /* Fotos */
+      .evidencia {
+          page-break-before: always;
+      }
+
       .galeria {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 50px;
-        max-width: 75%;
-        margin: 0 auto;
+          width: 100%;
+          margin: 0;
       }
 
       .foto-item {
-        break-inside: avoid;
-        page-break-inside: avoid;
+          width: 100%;
+          page-break-inside: avoid;
+          break-inside: avoid;
+          text-align: center;
+          padding: 0 10mm;
+          box-sizing: border-box;
+      }
+
+      .foto-item + .foto-item {
+          page-break-before: always;
+          break-before: page;
       }
 
       .foto-item img {
-        width: 100%;
-        height: auto;
-        display: block;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        /* margin-bottom: 20px; */
-        margin: 0 auto 20px auto;
+          width: 100%;
+          max-width: 100%;
+          max-height: 75vh;
+          height: auto;
+          display: block;
+          margin: 0 auto;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          object-fit: contain;
       }
 
       /* Firma - CENTRADO COMPLETO */
@@ -238,8 +250,7 @@
       /* Print */
       @media print {
         body { padding: 20px 28px; }
-        .galeria { grid-template-columns: repeat(2, 1fr); }
-        .foto-item img { max-height: 160px; object-fit: cover; }
+        .foto-item img { max-height: 8.25in; }
       }
     </style>
   </head>
@@ -368,7 +379,7 @@
       <p class="bloque-texto">{{ data_view.inspection.notes }}</p>
     </div>
 
-    <div class="seccion">
+    <div class="seccion evidencia">
       <p class="seccion-titulo">Evidencia Fotográfica - {{ data_view.inspection.photos|length }} fotos</p>
       <div class="galeria">
         {% for photo in data_view.inspection.photos %}
