@@ -103,7 +103,7 @@
                       <span
                         class="text-sm font-medium text-slate-400 transition-colors group-hover:text-primary-400 whitespace-nowrap"
                       >
-                        ({{ vehicle.brand || 'N/A' }} - {{ vehicle.model || 'N/A' }})
+                        ({{ vehicle.brand || 'N/A' }})
                       </span>
                     </div>
                     <div
@@ -164,8 +164,7 @@
                 <h4 class="text-xl font-bold text-slate-800">Vehículo Confirmado</h4>
                 <p class="text-slate-500 text-sm">
                   Placa:
-                  <span class="font-bold text-slate-700">{{ selectedVehicle()?.plate }}</span> |
-                  Marca: {{ selectedVehicle()?.brand || 'N/A' }}
+                  <span class="font-bold text-slate-700">{{ selectedVehicle()?.plate }}</span>
                 </p>
               </div>
             </div>
@@ -280,10 +279,13 @@
                 subscriptSizing="dynamic"
                 class="w-full compact-form-field"
               >
-                <mat-label>Kilometraje</mat-label>
-                <input matInput type="number" formControlName="mileage" placeholder="Ej. 90827" />
-                <span matTextSuffix class="text-slate-400 text-sm mr-2 font-medium">km</span>
-                <mat-icon matSuffix class="text-slate-400 scale-90">speed</mat-icon>
+                <mat-label>Marca GPS</mat-label>
+                <mat-select formControlName="gps_brand_id">
+                  @for (brand of gpsBrands(); track brand.id) {
+                    <mat-option [value]="brand.id">{{ brand.name }}</mat-option>
+                  }
+                </mat-select>
+                <mat-icon matSuffix class="text-slate-400 scale-90">branding_watermark</mat-icon>
               </mat-form-field>
 
               <mat-form-field
@@ -293,7 +295,43 @@
               >
                 <mat-label>Serial GPS</mat-label>
                 <input matInput formControlName="gps_serial" placeholder="Ingrese serial GPS" />
+                @if (inspectionForm.get('gps_serial')?.value) {
+                  <button
+                    matSuffix
+                    mat-icon-button
+                    type="button"
+                    (click)="clearControl('gps_serial')"
+                    class="!w-8 !h-8 !p-0 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    <mat-icon class="scale-75">close</mat-icon>
+                  </button>
+                }
                 <mat-icon matSuffix class="text-slate-400 scale-90">satellite_alt</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field
+                appearance="fill"
+                subscriptSizing="dynamic"
+                class="w-full compact-form-field"
+              >
+                <mat-label>Serial Celular</mat-label>
+                <input
+                  matInput
+                  formControlName="celular_serial"
+                  placeholder="Ingrese serial del equipo"
+                />
+                @if (inspectionForm.get('celular_serial')?.value) {
+                  <button
+                    matSuffix
+                    mat-icon-button
+                    type="button"
+                    (click)="clearControl('celular_serial')"
+                    class="!w-8 !h-8 !p-0 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    <mat-icon class="scale-75">close</mat-icon>
+                  </button>
+                }
+                <mat-icon matSuffix class="text-slate-400 scale-90">sim_card</mat-icon>
               </mat-form-field>
 
               <mat-form-field
@@ -308,21 +346,32 @@
                   formControlName="celular_number"
                   placeholder="Ej. 310 123 4567"
                 />
+                @if (inspectionForm.get('celular_number')?.value) {
+                  <button
+                    matSuffix
+                    mat-icon-button
+                    type="button"
+                    (click)="clearControl('celular_number')"
+                    class="!w-8 !h-8 !p-0 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    <mat-icon class="scale-75">close</mat-icon>
+                  </button>
+                }
                 <mat-icon matSuffix class="text-slate-400 scale-90">phone_iphone</mat-icon>
               </mat-form-field>
 
               <mat-form-field
                 appearance="fill"
                 subscriptSizing="dynamic"
-                class="w-full compact-form-field"
+                class="w-full compact-form-field sm:col-span-2"
               >
-                <mat-label>Serial Celular</mat-label>
-                <input
-                  matInput
-                  formControlName="celular_serial"
-                  placeholder="Ingrese serial del equipo"
-                />
-                <mat-icon matSuffix class="text-slate-400 scale-90">sim_card</mat-icon>
+                <mat-label>Forma de Instalación</mat-label>
+                <mat-select formControlName="installation_way">
+                  @for (way of installationWays(); track way) {
+                    <mat-option [value]="way">{{ way }}</mat-option>
+                  }
+                </mat-select>
+                <mat-icon matSuffix class="text-slate-400 scale-90">build</mat-icon>
               </mat-form-field>
 
               <mat-form-field
@@ -421,7 +470,7 @@
 
       <button
         mat-stroked-button
-        mat-dialog-close
+        (click)="closeDialog()"
         class="rounded-lg h-10 px-6 border-slate-300! text-slate-600!"
       >
         Cancelar

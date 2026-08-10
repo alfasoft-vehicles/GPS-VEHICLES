@@ -2,6 +2,8 @@ export interface Vehicle {
   id: string;
   plate: string;
   brand: string;
+  brand_id?: string;
+  gps_brand_id?: string;
   model: string;
   color?: string;
   vehicle_type?: string;

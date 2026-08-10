@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte de Inspección</title>
+    <title>Control Inspecciones de GPS</title>
     <style>
       body {
         font-family: 'Inter', 'Segoe UI', sans-serif;
@@ -172,27 +172,39 @@
       }
 
       /* Fotos */
+      .evidencia {
+          page-break-before: always;
+      }
+
       .galeria {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 50px;
-        max-width: 75%;
-        margin: 0 auto;
+          width: 100%;
+          margin: 0;
       }
 
       .foto-item {
-        break-inside: avoid;
-        page-break-inside: avoid;
+          width: 100%;
+          page-break-inside: avoid;
+          break-inside: avoid;
+          text-align: center;
+          padding: 0 10mm;
+          box-sizing: border-box;
+      }
+
+      .foto-item + .foto-item {
+          page-break-before: always;
+          break-before: page;
       }
 
       .foto-item img {
-        width: 100%;
-        height: auto;
-        display: block;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        /* margin-bottom: 20px; */
-        margin: 0 auto 20px auto;
+          width: 100%;
+          max-width: 100%;
+          max-height: 75vh;
+          height: auto;
+          display: block;
+          margin: 0 auto;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          object-fit: contain;
       }
 
       /* Firma - CENTRADO COMPLETO */
@@ -238,8 +250,7 @@
       /* Print */
       @media print {
         body { padding: 20px 28px; }
-        .galeria { grid-template-columns: repeat(2, 1fr); }
-        .foto-item img { max-height: 160px; object-fit: cover; }
+        .foto-item img { max-height: 8.25in; }
       }
     </style>
   </head>
@@ -281,7 +292,7 @@
         <tr>
           <td>
             <div class="detalle-item">
-              <span class="detalle-label">Propietario</span>
+              <span class="detalle-label">Cliente</span>
               <span class="detalle-valor">{{ data_view.inspection.owner_name if data_view.inspection.owner_name else '&nbsp;' }}</span>
             </div>
           </td>
@@ -301,16 +312,16 @@
           </td>
           <td>
             <div class="detalle-item">
-              <span class="detalle-label">Kilometraje</span>
-              <span class="detalle-valor">{{ data_view.inspection.mileage if data_view.inspection.mileage else '&nbsp;' }}</span>
+              <span class="detalle-label">Forma de Instalación</span>
+              <span class="detalle-valor">{{ data_view.inspection.installation_way if data_view.inspection.installation_way else '&nbsp;' }}</span>
             </div>
           </td>
         </tr>
         <tr>
           <td>
             <div class="detalle-item">
-              <span class="detalle-label">Tipo de Instalación</span>
-              <span class="detalle-valor">{{ data_view.inspection.instalation_type if data_view.inspection.instalation_type else '&nbsp;' }}</span>
+              <span class="detalle-label">Marca GPS</span>
+              <span class="detalle-valor">{{ data_view.inspection.gps_brand if data_view.inspection.gps_brand else '&nbsp;' }}</span>
             </div>
           </td>
           <td>
@@ -338,7 +349,7 @@
           <td>
             <div class="detalle-item">
               <span class="detalle-label">Inspección realizada por</span>
-              <span class="detalle-valor">{{ data_view.inspection.user if data_view.inspection.user else '&nbsp;' }}</span>
+              <span class="detalle-valor">{{ data_view.inspection.inspection_user if data_view.inspection.inspection_user else '&nbsp;' }}</span>
             </div>
           </td>
           <td>
@@ -368,7 +379,7 @@
       <p class="bloque-texto">{{ data_view.inspection.notes }}</p>
     </div>
 
-    <div class="seccion">
+    <div class="seccion evidencia">
       <p class="seccion-titulo">Evidencia Fotográfica - {{ data_view.inspection.photos|length }} fotos</p>
       <div class="galeria">
         {% for photo in data_view.inspection.photos %}

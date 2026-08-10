@@ -23,6 +23,17 @@
             vertical-align: bottom;
         }
 
+        .logo-cell{
+            width:25%;
+        }
+
+        .logo{
+            width:200px;
+            height:auto;
+            position: relative;
+            top: 20px;
+        }
+
         .left-space {
             width: 20%;
         }
@@ -72,8 +83,11 @@
 
     <table class="header-table">
         <tr>
+            <td class="logo-cell">
+                <img src="{{ data_view['logo_url'] }}" class="logo" alt="Logo de la empresa">
+            </td>
 
-            <td class="left-space"></td>
+            <!-- <td class="left-space"></td> -->
 
             <td class="title-cell">
                 <!-- <h2>{{ data_view['title'] }}</h2> -->

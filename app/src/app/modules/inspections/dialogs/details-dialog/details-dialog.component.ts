@@ -12,14 +12,15 @@ interface InspectionDetails {
   owner: string;
   owner_name: string;
   inspection_type: string;
-  instalation_type: string;
   vehicle_id: string;
   plate: string;
   vehicle_status: string;
-  mileage: string | number;
+  gps_brand?: string;
+  gps_brand_id?: string;
   gps_serial: string;
   celular_number: string;
   celular_serial: string;
+  installation_way: string;
   description: string;
   notes: string;
   status: string;

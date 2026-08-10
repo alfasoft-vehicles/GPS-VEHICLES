@@ -1,4 +1,5 @@
 import uuid
+from pathlib import Path
 
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.encoders import jsonable_encoder
@@ -11,6 +12,7 @@ from models.vehiculos import Vehiculos
 from models.propietarios import Propietarios
 from models.usuarios import Usuarios
 from models.estados import Estados
+from models.marcas import Marcas
 from schemas.inspections import NewInspection, InspectionInfo
 from utils.inspections import update_expired_inspections
 from datetime import datetime, timedelta
@@ -73,6 +75,9 @@ async def create_inspection(data: NewInspection, db: Session, current_user: dict
     date = now_in_panama.strftime("%Y-%m-%d")
     time = now_in_panama.strftime("%I:%M:%S %p")
 
+    brand = db.query(Marcas).filter(Marcas.ID == data.gps_brand_id).first() if data.gps_brand_id else None
+    brand_name = brand.NOMBRE.strip() if brand and brand.NOMBRE else ""
+
     new_inspection = Inspecciones(
       FECHA=date,
       HORA=time,
@@ -82,11 +87,12 @@ async def create_inspection(data: NewInspection, db: Session, current_user: dict
       NOMPROPI=owner.NOMBRE,
       TIPO_INSPEC=inspection_type.ID,
       NOMINSPEC=inspection_type.NOMBRE,
-      TIPO_INSTALACION=data.instalation_type,
-      KILOMETRAJ=data.mileage,
+      ID_MARCA=data.gps_brand_id if data.gps_brand_id else "",
+      NOMMARCA=brand_name,
       GPS_SERIAL=data.gps_serial,
       CEL_NUMERO=data.celular_number,
       CEL_SERIAL=data.celular_serial,
+      FORMA_INSTALACION=data.installation_way,
       DESCRIPCION=data.description,
       OBSERVA=data.notes if data.notes else "",
       USUARIO=user.ID if user else "",
@@ -311,6 +317,7 @@ async def inspection_details(inspection_id: int, db: Session):
         photos.append(photo_url)
 
     user = db.query(Usuarios).filter(Usuarios.ID == str(inspection.USUARIO)).first()
+    brand = db.query(Marcas).filter(Marcas.ID == str(inspection.ID_MARCA)).first() if inspection.ID_MARCA else None
     
     inspection_data = {
       "id": inspection.ID,
@@ -319,14 +326,15 @@ async def inspection_details(inspection_id: int, db: Session):
       "owner": inspection.PROPIETARIO,
       "owner_name": owner.NOMBRE,
       "inspection_type": inspection.TIPO_INSPEC + ' - ' + inspection_type.NOMBRE,
-      "instalation_type": inspection.TIPO_INSTALACION,
       "vehicle_id": inspection.ID_VEHICULO,
       "plate": vehicle.PLACA,
       "vehicle_status": vehicle_status,
-      "mileage": inspection.KILOMETRAJ if inspection.KILOMETRAJ else "",
+      "gps_brand_id": inspection.ID_MARCA.strip() if inspection.ID_MARCA else "",
+      "gps_brand": inspection.NOMMARCA.strip() if inspection.NOMMARCA else (brand.NOMBRE.strip() if brand else ""),
       "gps_serial": inspection.GPS_SERIAL if inspection.GPS_SERIAL else "",
       "celular_number": inspection.CEL_NUMERO if inspection.CEL_NUMERO else "",
       "celular_serial": inspection.CEL_SERIAL if inspection.CEL_SERIAL else "",
+      "installation_way": inspection.FORMA_INSTALACION if inspection.FORMA_INSTALACION else "",
       "description": inspection.DESCRIPCION,
       "notes": inspection.OBSERVA if inspection.OBSERVA else "",
       "status": inspection.ESTADO,
@@ -354,13 +362,17 @@ async def update_inspection(inspection_id: int, data: NewInspection, db: Session
     if not inspection_type:
       return JSONResponse(content={"message": "Inspection type not found"}, status_code=404)
 
+    brand = db.query(Marcas).filter(Marcas.ID == data.gps_brand_id).first() if data.gps_brand_id else None
+    brand_name = brand.NOMBRE.strip() if brand and brand.NOMBRE else ""
+
     inspection.TIPO_INSPEC = inspection_type.ID
     inspection.NOMINSPEC = inspection_type.NOMBRE
-    inspection.TIPO_INSTALACION = data.instalation_type
-    inspection.KILOMETRAJ = data.mileage
+    inspection.ID_MARCA = data.gps_brand_id if data.gps_brand_id else ""
+    inspection.NOMMARCA = brand_name
     inspection.GPS_SERIAL = data.gps_serial
     inspection.CEL_NUMERO = data.celular_number
     inspection.CEL_SERIAL = data.celular_serial
+    inspection.FORMA_INSTALACION = data.installation_way
     inspection.DESCRIPCION = data.description
     inspection.OBSERVA = data.notes if data.notes else ""
 
@@ -388,6 +400,7 @@ async def inspection_report(inspection_id: int, db: Session, current_user: dict)
 
     user_id = current_user.get("codigo")
     user_name = db.query(Usuarios).filter(Usuarios.ID == user_id).first()
+    brand = db.query(Marcas).filter(Marcas.ID == str(inspection.ID_MARCA)).first() if inspection.ID_MARCA else None
 
     photos = []
     for i in range(1, 9): 
@@ -406,14 +419,15 @@ async def inspection_report(inspection_id: int, db: Session, current_user: dict)
       "owner": inspection.PROPIETARIO,
       "owner_name": inspection.NOMPROPI,
       "inspection_type": inspection.TIPO_INSPEC + ' - ' + inspection_type.NOMBRE if inspection_type else "",
-      "instalation_type": inspection.TIPO_INSTALACION,
       "vehicle_id": inspection.ID_VEHICULO,
       "plate": vehicle.PLACA,
       "vehicle_status": vehicle_status,
-      "mileage": inspection.KILOMETRAJ if inspection.KILOMETRAJ else "",
+      "gps_brand_id": inspection.ID_MARCA.strip() if inspection.ID_MARCA else "",
+      "gps_brand": inspection.NOMMARCA.strip() if inspection.NOMMARCA else (brand.NOMBRE.strip() if brand else ""),
       "gps_serial": inspection.GPS_SERIAL if inspection.GPS_SERIAL else "",
       "celular_number": inspection.CEL_NUMERO if inspection.CEL_NUMERO else "",
       "celular_serial": inspection.CEL_SERIAL if inspection.CEL_SERIAL else "",
+      "installation_way": inspection.FORMA_INSTALACION if inspection.FORMA_INSTALACION else "",
       "description": inspection.DESCRIPCION,
       "notes": inspection.OBSERVA if inspection.OBSERVA else "",
       "status": inspection.ESTADO,
@@ -427,13 +441,15 @@ async def inspection_report(inspection_id: int, db: Session, current_user: dict)
     date = now_in_panama.strftime("%d/%m/%Y")
     hour = now_in_panama.strftime("%I:%M:%S %p")
 
-    title = 'Inspección de Vehículo'
+    title = 'Control Inspecciones de GPS'
+    logo_path = Path(__file__).resolve().parent.parent / 'assets' / 'LogoEmpresa.jpg'
     data_view = {
       'inspection': inspection_data,
       'date': date,
       'hour': hour,
       'user': user_name.NOMBRE if user_name else "",
-      'title': title
+      'title': title,
+      'logo_url': logo_path.resolve().as_uri()
     }
 
     headers = {
@@ -546,7 +562,6 @@ async def general_inspections_report(data: InspectionInfo, db: Session, current_
         "details": inspection.DESCRIPCION,
         "vehicle_id": inspection.ID_VEHICULO,
         "plate": inspection.PLACA,
-        "mileage": inspection.KILOMETRAJ if inspection.KILOMETRAJ else "",
         "owner_id": inspection.PROPIETARIO,
         "owner_name": owners_dict.get(inspection.PROPIETARIO, ""),
         "status": "FINALIZADA" if inspection.ESTADO == "FIN" else ("PENDIENTE" if inspection.ESTADO == "PEN" else ("SUSPENDIDA" if inspection.ESTADO == "SUS" else inspection.ESTADO)),
