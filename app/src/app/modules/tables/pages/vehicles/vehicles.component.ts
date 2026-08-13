@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   Component,
+  HostListener,
   OnInit,
   viewChild,
   ViewChild,
@@ -21,6 +22,9 @@ import { finalize } from 'rxjs';
 export class VehiclesComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
+  readonly ROW_HEIGHT = 56;
+  readonly FIXED_SPACE_VERTICAL = 499.5;
+
   displayedColumns: string[] = [
     'id',
     'plate',
@@ -39,6 +43,7 @@ export class VehiclesComponent implements OnInit, AfterViewInit {
 
   totalItems = 0;
   pageSize = 10;
+  pageSizeOptions: number[] = [5, 10, 20, 50];
   pageNumber = 1;
   currentFilterValue = '';
   isLoading = false;
@@ -49,7 +54,38 @@ export class VehiclesComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
+    this.calculateDynamicPageSize(false);
     this.loadVehicles();
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    this.calculateDynamicPageSize();
+  }
+
+  calculateDynamicPageSize(triggerLoad = true) {
+    const isMobile = window.innerWidth < 768;
+
+    if (isMobile) {
+      this.pageSizeOptions = [5, 10, 20, 50];
+      if (this.pageSize !== 10) {
+        this.pageSize = 10;
+        if (triggerLoad) this.loadVehicles();
+      }
+      return;
+    }
+
+    const windowHeight = window.innerHeight;
+    const availableHeight = windowHeight - this.FIXED_SPACE_VERTICAL;
+    const rowsThatFit = Math.max(1, Math.floor(availableHeight / this.ROW_HEIGHT));
+
+    const currentOptions = new Set([rowsThatFit, 5, 10, 20, 50]);
+    this.pageSizeOptions = [...currentOptions].sort((a, b) => a - b);
+
+    if (this.pageSize !== rowsThatFit) {
+      this.pageSize = rowsThatFit;
+      if (triggerLoad) this.loadVehicles();
+    }
   }
 
   ngAfterViewInit() {
