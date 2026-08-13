@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { TablesRoutingModule } from './tables-routing-module';
 import { DashboardViewComponent } from './pages/dashboard-view/dashboard-view.component';
-import { GroupsComponent } from './pages/groups/groups.component';
+import { ExampleTabComponent } from './pages/example-tab/example-tab.component';
 import { VehiclesComponent } from './pages/vehicles/vehicles.component';
 import { OwnersComponent } from './pages/owners/owners.component';
 import { InventoryComponent } from './pages/inventory/inventory.component';
@@ -14,7 +14,7 @@ import { NoResultDataComponent } from './components/no-result-data/no-result-dat
 @NgModule({
   declarations: [
     DashboardViewComponent,
-    GroupsComponent,
+    ExampleTabComponent,
     VehiclesComponent,
     OwnersComponent,
     InventoryComponent,

@@ -29,8 +29,8 @@ export class HomeComponent {
       colorClass: 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white',
       iconBg: 'bg-indigo-100 group-hover:bg-white/20',
       borderColor: 'hover:border-indigo-200',
-      disabled: true,
-      tooltip: '¡Próximamente!',
+      disabled: false,
+      // tooltip: '¡Próximamente!',
     },
     {
       title: 'Inspecciones',
