@@ -2,28 +2,30 @@
   <mat-form-field class="field-input w-full h-12" subscriptSizing="dynamic">
     <mat-label>Buscar</mat-label>
 
-    <input matInput [value]="query()" (input)="updateQuery($event)" (keyup)="onSearch($event)" />
+    <input matInput [value]="query()" (input)="onSearch($event)" />
 
     @if (query()) {
-    <button mat-icon-button matSuffix (click)="clearSearch()" aria-label="Borrar búsqueda">
-      <mat-icon>close</mat-icon>
-    </button>
+      <button mat-icon-button matSuffix (click)="clearSearch()" aria-label="Borrar búsqueda">
+        <mat-icon>close</mat-icon>
+      </button>
     } @else {
-    <mat-icon matSuffix>search</mat-icon>
+      <mat-icon matSuffix>search</mat-icon>
     }
   </mat-form-field>
 
-  <button
-    mat-flat-button
-    color="primary"
-    (click)="add.emit()"
-    class="shrink-0 h-12 min-w-12 px-0 md:w-auto md:px-6 transition-all duration-300"
-  >
-    <div class="flex items-center justify-center">
-      <mat-icon class="md:hidden">add</mat-icon>
-      <span class="hidden md:block whitespace-nowrap">
-        {{ actionButtonLabel() }}
-      </span>
-    </div>
-  </button>
+  @if (actionButtonLabel()) {
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="add.emit()"
+      class="shrink-0 h-12 min-w-12 px-0 md:w-auto md:px-6 transition-all duration-300"
+    >
+      <div class="flex items-center justify-center">
+        <mat-icon class="md:hidden">add</mat-icon>
+        <span class="hidden md:block whitespace-nowrap">
+          {{ actionButtonLabel() }}
+        </span>
+      </div>
+    </button>
+  }
 </div>

@@ -1,4 +1,6 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, input, output, signal, OnInit, OnDestroy } from '@angular/core';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-search-header',
@@ -6,27 +8,37 @@ import { Component, input, output, signal } from '@angular/core';
   templateUrl: './search-header.component.html',
   styleUrl: './search-header.component.css',
 })
-export class SearchHeaderComponent {
-  actionButtonLabel = input.required<string>();
+export class SearchHeaderComponent implements OnInit, OnDestroy {
+  actionButtonLabel = input<string>();
 
   search = output<string>();
   add = output<void>();
 
   query = signal('');
 
-  updateQuery(event: Event) {
-    const value = (event.target as HTMLInputElement).value;
-    this.query.set(value);
+  private searchSubject = new Subject<string>();
+  private searchSub?: Subscription;
+
+  ngOnInit() {
+    this.searchSub = this.searchSubject
+      .pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe((value) => {
+        this.search.emit(value);
+      });
+  }
+
+  ngOnDestroy() {
+    this.searchSub?.unsubscribe();
   }
 
   onSearch(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.query.set(value);
-    this.search.emit(value);
+    this.searchSubject.next(value);
   }
 
   clearSearch() {
     this.query.set('');
-    this.search.emit('');
+    this.searchSubject.next('');
   }
 }
