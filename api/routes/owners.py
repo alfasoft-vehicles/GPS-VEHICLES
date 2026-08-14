@@ -17,3 +17,7 @@ async def get_all_owners(pagination: OwnerPagination = Depends(), db: Session = 
 @owners_router.get('/info/{owner_id}', tags=["Owners"])
 async def get_owner_info(owner_id: str, db: Session = Depends(get_db)):
   return await owner_info(owner_id, db)
+
+@owners_router.get('/basic-info/{owner_id}', tags=["Owners"])
+async def get_owner_basic_info(owner_id: str, db: Session = Depends(get_db)):
+  return await owner_basic_info(owner_id, db)

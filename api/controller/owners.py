@@ -4,6 +4,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import cast, Integer
 from models.propietarios import Propietarios
 from models.ciudades import Ciudades
+from models.vehiculos import Vehiculos
+from models.tiposvehiculos import TiposVehiculos
+from models.estados import Estados
 from schemas.owner import *
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -117,6 +120,73 @@ async def owner_info(owner_id: str, db: Session):
       'auditor_id': owner.ID_USUARIO,
       'auditor_name': owner.NOMUSUARIO,
       'notes': owner.OBSERVA
+    }
+
+    return JSONResponse(content=jsonable_encoder(response), status_code=200)
+  except Exception as e:
+    return JSONResponse(content={"error": str(e)}, status_code=500)
+
+# ---------------------------------------------------------------------------------------------------------------
+
+async def owner_basic_info(owner_id: str, db: Session):
+  try:
+    owner = db.query(Propietarios).filter(Propietarios.ID == owner_id).first()
+
+    if not owner:
+      return JSONResponse(content={"message": "Owner not found"}, status_code=404)
+
+    vehicles_query = db.query(
+      Vehiculos.ID,
+      Vehiculos.PLACA,
+      Vehiculos.ID_TIPOVEH,
+      Vehiculos.ID_ESTADO,
+      Vehiculos.ID_PROPIE,
+      Vehiculos.PLANPAGO,
+      Vehiculos.CUO_ADMON,
+      Vehiculos.FORMAINSTA,
+      Vehiculos.PREND_APAG,
+      Vehiculos.GPS_SERIAL,
+      Vehiculos.CEL_SERIAL,
+      Vehiculos.CEL_NUMERO,
+      TiposVehiculos.NOMBRE.label('type_name'),
+      Estados.NOMBRE.label('status_name'),
+      Propietarios.NOMBRE.label('owner_name'),
+    ).outerjoin(TiposVehiculos, Vehiculos.ID_TIPOVEH == TiposVehiculos.ID
+    ).outerjoin(Estados, Vehiculos.ID_ESTADO == Estados.ID
+    ).outerjoin(Propietarios, Vehiculos.ID_PROPIE == Propietarios.ID
+    ).filter(Vehiculos.ID_PROPIE == owner_id
+    ).order_by(cast(Vehiculos.ID, Integer)).all()
+
+    vehicles = [
+      {
+        'id': vehicle.ID,
+        'plate': vehicle.PLACA, 
+        'owner_id': vehicle.ID_PROPIE,
+        'owner_name': vehicle.owner_name if vehicle.owner_name else '',
+        'type_id': vehicle.ID_TIPOVEH,
+        'type_name': vehicle.type_name if vehicle.type_name else '',
+        'status_id': vehicle.ID_ESTADO,
+        'status_name': vehicle.status_name if vehicle.status_name else '',
+        'payment_plan': 'Quincenal' if vehicle.PLANPAGO == 1 else 'Mensual' if vehicle.PLANPAGO == 2 else 'Anual' if vehicle.PLANPAGO == 3 else 'No definido',
+        'cuoadmon': vehicle.CUO_ADMON if vehicle.CUO_ADMON else '',
+        'installation_method': 'Rastreo' if vehicle.FORMAINSTA == 1 else 'Corta Corriente' if vehicle.FORMAINSTA == 2 else 'Bomba Gasolina' if vehicle.FORMAINSTA == 3 else 'Ninguno',
+        'gps_status': 'Prendido' if vehicle.PREND_APAG == 1 else 'Apagado',
+        'gps_serial': vehicle.GPS_SERIAL if vehicle.GPS_SERIAL else '',
+        'cel_serial': vehicle.CEL_SERIAL if vehicle.CEL_SERIAL else '',
+        'cel_num': vehicle.CEL_NUMERO if vehicle.CEL_NUMERO else '',
+      } for vehicle in vehicles_query
+    ]
+
+    response = {
+      'id': owner.ID, 
+      'name': owner.NOMBRE,
+      'phone': owner.TELEFONO,
+      'email': owner.CORREO,
+      'admon_value': owner.VLR_ADMON,
+      'prices_list': 'Venta' if owner.LISTA == 1 else 'Costo' if owner.LISTA == 2 else '',
+      'payment_plan': 'Quincenal' if owner.PLANPAGO == 1 else 'Mensual' if owner.PLANPAGO == 2 else 'Anual' if owner.PLANPAGO == 3 else '',
+      'status': 'Activo' if owner.ESTADO == 1 else 'Suspendido' if owner.ESTADO == 2 else 'Retirado' if owner.ESTADO == 3 else '',
+      'vehicles': vehicles
     }
 
     return JSONResponse(content=jsonable_encoder(response), status_code=200)

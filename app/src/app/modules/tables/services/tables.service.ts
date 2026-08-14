@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable, of, tap } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { VehiclesResponse } from '../interfaces/vehicles-table.interface';
-import { OwnersResponse } from '../interfaces/owners-table.interface';
+import { OwnersResponse, OwnerBasicInfoResponse } from '../interfaces/owners-table.interface';
 import { InventoryResponse } from '../interfaces/inventory-table.interface';
 import { TableCache } from '../interfaces/cache.interface';
 
@@ -15,6 +15,10 @@ export class TablesService {
   private vehiclesCache: TableCache<VehiclesResponse> | null = null;
   private ownersCache: TableCache<OwnersResponse> | null = null;
   private inventoryCache: TableCache<InventoryResponse> | null = null;
+
+  getOwnerBasicInfo(ownerId: string): Observable<OwnerBasicInfoResponse> {
+    return this.apiService.get<OwnerBasicInfoResponse>(`/owners/basic-info/${ownerId}`);
+  }
 
   hasValidVehiclesCache(page: number, size: number, search: string = ''): boolean {
     return !!(

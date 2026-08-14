@@ -8,8 +8,10 @@ import {
 } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatDialog } from '@angular/material/dialog';
 import { OwnerTableItem } from '../../interfaces/owners-table.interface';
 import { TablesService } from '../../services/tables.service';
+import { OwnerDetailsDialogComponent } from '../../dialogs/owner-details-dialog/owner-details-dialog.component';
 import { finalize } from 'rxjs';
 
 @Component({
@@ -46,6 +48,7 @@ export class OwnersComponent implements OnInit, AfterViewInit {
   constructor(
     private tablesService: TablesService,
     private cdr: ChangeDetectorRef,
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -140,5 +143,18 @@ export class OwnersComponent implements OnInit, AfterViewInit {
     this.pageSize = event.pageSize;
     this.pageNumber = event.pageIndex + 1; // Backend pagination is 1-indexed
     this.loadOwners();
+  }
+
+  openOwnerDialog(owner: OwnerTableItem) {
+    this.dialog.open(OwnerDetailsDialogComponent, {
+      width: '1200px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      panelClass: 'custom-dialog-container',
+      data: {
+        ownerId: owner.id,
+        ownerName: owner.name,
+      },
+    });
   }
 }

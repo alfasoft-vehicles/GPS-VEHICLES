@@ -10,6 +10,7 @@ import { InventoryComponent } from './components/inventory/inventory.component';
 import { SearchHeaderComponent } from './components/search-header/search-header.component';
 import { SharedModule } from '../../shared/shared-module';
 import { NoResultDataComponent } from './components/no-result-data/no-result-data.component';
+import { OwnerDetailsDialogComponent } from './dialogs/owner-details-dialog/owner-details-dialog.component';
 
 @NgModule({
   declarations: [
@@ -20,6 +21,7 @@ import { NoResultDataComponent } from './components/no-result-data/no-result-dat
     InventoryComponent,
     SearchHeaderComponent,
     NoResultDataComponent,
+    OwnerDetailsDialogComponent,
   ],
   imports: [CommonModule, TablesRoutingModule, SharedModule],
 })
