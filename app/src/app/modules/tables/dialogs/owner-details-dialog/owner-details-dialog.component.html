@@ -13,7 +13,7 @@
       </div>
       <div>
         <h2 class="text-xl font-bold text-slate-800 tracking-tight leading-tight">
-          Información del Propietario
+          Información del Cliente
         </h2>
         <p class="text-slate-500 text-xs mt-0.5">Detalles generales y vehículos registrados</p>
       </div>
@@ -35,20 +35,18 @@
     @if (isLoading()) {
       <div class="flex-1 flex flex-col items-center justify-center bg-white p-12 min-h-[400px]">
         <mat-spinner diameter="44"></mat-spinner>
-        <p class="text-slate-500 text-sm font-medium mt-4">
-          Cargando información del propietario...
-        </p>
+        <p class="text-slate-500 text-sm font-medium mt-4">Cargando información del cliente...</p>
       </div>
     } @else if (ownerData()) {
       <div class="flex-1 overflow-y-auto p-6 space-y-6">
-        <!-- 1. INFORMACIÓN BÁSICA DEL PROPIETARIO -->
+        <!-- 1. INFORMACIÓN BÁSICA DEL CLIENTE -->
         <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
           <div
             class="px-5 py-3 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between"
           >
             <div class="flex items-center gap-2">
               <mat-icon class="text-blue-600 text-lg !w-5 !h-5 leading-none">badge</mat-icon>
-              <h3 class="font-bold text-slate-800 text-sm">Datos del Propietario</h3>
+              <h3 class="font-bold text-slate-800 text-sm">Datos del Cliente</h3>
             </div>
             <!-- Estado Badge -->
             <span
@@ -145,7 +143,7 @@
               <mat-icon class="text-blue-600 text-lg !w-5 !h-5 leading-none"
                 >directions_car</mat-icon
               >
-              <h3 class="font-bold text-slate-800 text-sm">Vehículos del Propietario</h3>
+              <h3 class="font-bold text-slate-800 text-sm">Vehículos del Cliente</h3>
             </div>
             <span
               class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-200"
@@ -173,7 +171,7 @@
                 </ng-container>
 
                 <ng-container matColumnDef="owner_name">
-                  <th mat-header-cell *matHeaderCellDef>Propietario</th>
+                  <th mat-header-cell *matHeaderCellDef>Cliente</th>
                   <td mat-cell *matCellDef="let vehicle">
                     <span class="truncate max-w-[150px] block" [title]="vehicle.owner_name">{{
                       vehicle.owner_name
@@ -262,10 +260,10 @@
                   >directions_car</mat-icon
                 >
                 <p class="text-sm font-semibold text-slate-700">
-                  Este propietario no tiene vehículos registrados
+                  Este cliente no tiene vehículos registrados
                 </p>
                 <p class="text-xs text-slate-400 mt-1">
-                  Cuando se asignen vehículos a este propietario, aparecerán listados aquí.
+                  Cuando se asignen vehículos a este cliente, aparecerán listados aquí.
                 </p>
               </div>
             }
@@ -278,7 +276,7 @@
           >error_outline</mat-icon
         >
         <p class="text-sm font-semibold text-slate-700">
-          No se pudo cargar la información del propietario
+          No se pudo cargar la información del cliente
         </p>
         <button mat-flat-button color="primary" class="mt-4" (click)="loadOwnerDetails()">
           Reintentar
