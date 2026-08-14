@@ -111,7 +111,7 @@ export class DialogNewInspectionComponent implements OnInit {
     // Mapeamos los datos para iterar fácilmente en el HTML
     return [
       { label: 'Placa', value: formatValue(vehicle.plate), icon: 'directions_car' },
-      { label: 'Propietario', value: formatValue(vehicle.owner_name), icon: 'person' },
+      { label: 'Cliente', value: formatValue(vehicle.owner_name), icon: 'person' },
       { label: 'Marca GPS', value: formatValue(vehicle.brand), icon: 'branding_watermark' },
       { label: 'Serial GPS', value: formatValue(vehicle.gps_serial), icon: 'router' },
       { label: 'Serial Celular', value: formatValue(vehicle.cel_serial), icon: 'sim_card' },

@@ -17,6 +17,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @NgModule({
   declarations: [],
@@ -39,6 +40,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatDialogModule,
     MatSelectModule,
     MatAutocompleteModule,
+    MatProgressSpinnerModule,
   ],
   exports: [
     MatIconModule,
@@ -58,6 +60,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatDialogModule,
     MatSelectModule,
     MatAutocompleteModule,
+    MatProgressSpinnerModule,
   ],
 })
 export class SharedModule {}

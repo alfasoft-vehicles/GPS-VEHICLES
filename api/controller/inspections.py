@@ -207,11 +207,6 @@ async def upload_signature(inspection_id: int, db: Session, signature: UploadFil
 
 async def inspections_list(data: InspectionInfo, db: Session, current_user: dict):
   try:
-    panama_timezone = pytz.timezone('America/Panama')
-    now_in_panama = datetime.now(panama_timezone)
-    today = now_in_panama.date()
-    yesterday = today - timedelta(days=1)
-
     filters = []
 
     if data.initial_date != '' and data.final_date != '':
@@ -225,7 +220,7 @@ async def inspections_list(data: InspectionInfo, db: Session, current_user: dict
         filters.append(Inspecciones.ID_VEHICULO == data.vehicle_id)
 
     if not filters:
-      inspections = db.query(Inspecciones).filter(Inspecciones.FECHA >= yesterday).order_by(Inspecciones.FECHA.desc(), Inspecciones.HORA.desc()).all()
+      inspections = db.query(Inspecciones).order_by(Inspecciones.FECHA.desc(), Inspecciones.HORA.desc()).all()
     else:
       inspections = db.query(Inspecciones).filter(*filters).order_by(Inspecciones.FECHA.desc(), Inspecciones.HORA.desc()).all()
 

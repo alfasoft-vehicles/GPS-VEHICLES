@@ -1,0 +1,292 @@
+<div
+  class="flex flex-col h-[90vh] max-h-[850px] w-full max-w-[1200px] bg-white overflow-hidden rounded-xl"
+>
+  <!-- CABECERA DEL DIALOG -->
+  <div
+    class="flex items-center justify-between border-b border-slate-100 px-6 py-4 bg-white z-20 shrink-0"
+  >
+    <div class="flex items-center gap-3">
+      <div
+        class="bg-blue-50 text-blue-600 w-10 h-10 rounded-xl flex items-center justify-center border border-blue-100"
+      >
+        <mat-icon>person</mat-icon>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-slate-800 tracking-tight leading-tight">
+          Información del Cliente
+        </h2>
+        <p class="text-slate-500 text-xs mt-0.5">Detalles generales y vehículos registrados</p>
+      </div>
+    </div>
+    <button
+      mat-icon-button
+      (click)="closeDialog()"
+      class="text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- CONTENIDO -->
+  <mat-dialog-content
+    class="!p-0 flex-1 overflow-hidden flex flex-col bg-slate-50/50 relative !max-h-none w-full"
+  >
+    <!-- SPINNER CARGA -->
+    @if (isLoading()) {
+      <div class="flex-1 flex flex-col items-center justify-center bg-white p-12 min-h-[400px]">
+        <mat-spinner diameter="44"></mat-spinner>
+        <p class="text-slate-500 text-sm font-medium mt-4">Cargando información del cliente...</p>
+      </div>
+    } @else if (ownerData()) {
+      <div class="flex-1 overflow-y-auto p-6 space-y-6">
+        <!-- 1. INFORMACIÓN BÁSICA DEL CLIENTE -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+          <div
+            class="px-5 py-3 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between"
+          >
+            <div class="flex items-center gap-2">
+              <mat-icon class="text-blue-600 text-lg !w-5 !h-5 leading-none">badge</mat-icon>
+              <h3 class="font-bold text-slate-800 text-sm">Datos del Cliente</h3>
+            </div>
+            <!-- Estado Badge -->
+            <span
+              class="px-2.5 py-0.5 rounded text-xs font-bold border"
+              [class.bg-green-100]="ownerData()?.status === 'Activo'"
+              [class.text-green-700]="ownerData()?.status === 'Activo'"
+              [class.border-green-200]="ownerData()?.status === 'Activo'"
+              [class.bg-amber-100]="ownerData()?.status === 'Suspendido'"
+              [class.text-amber-700]="ownerData()?.status === 'Suspendido'"
+              [class.border-amber-200]="ownerData()?.status === 'Suspendido'"
+              [class.bg-rose-100]="ownerData()?.status === 'Retirado'"
+              [class.text-rose-700]="ownerData()?.status === 'Retirado'"
+              [class.border-rose-200]="ownerData()?.status === 'Retirado'"
+            >
+              {{ ownerData()?.status || 'N/A' }}
+            </span>
+          </div>
+
+          <div class="p-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <!-- Código -->
+            <div class="bg-slate-50/70 rounded-lg p-3 border border-slate-100">
+              <span class="text-xs font-semibold text-slate-400 block uppercase">Código</span>
+              <span class="text-sm font-bold text-slate-700 block mt-0.5">{{
+                ownerData()?.id || '—'
+              }}</span>
+            </div>
+
+            <!-- Nombre -->
+            <div class="bg-slate-50/70 rounded-lg p-3 border border-slate-100 sm:col-span-2">
+              <span class="text-xs font-semibold text-slate-400 block uppercase"
+                >Nombre / Razón Social</span
+              >
+              <span class="text-sm font-bold text-slate-800 block mt-0.5">{{
+                ownerData()?.name || '—'
+              }}</span>
+            </div>
+
+            <!-- Teléfono -->
+            <div class="bg-slate-50/70 rounded-lg p-3 border border-slate-100">
+              <span class="text-xs font-semibold text-slate-400 block uppercase">Teléfono</span>
+              <span class="text-sm font-medium text-slate-700 block mt-0.5">{{
+                ownerData()?.phone || '—'
+              }}</span>
+            </div>
+
+            <!-- Correo -->
+            <div class="bg-slate-50/70 rounded-lg p-3 border border-slate-100">
+              <span class="text-xs font-semibold text-slate-400 block uppercase"
+                >Correo Electrónico</span
+              >
+              <span
+                class="text-sm font-medium text-slate-700 block mt-0.5 truncate"
+                [title]="ownerData()?.email"
+                >{{ ownerData()?.email || '—' }}</span
+              >
+            </div>
+
+            <!-- Valor Adm. -->
+            <div class="bg-slate-50/70 rounded-lg p-3 border border-slate-100">
+              <span class="text-xs font-semibold text-slate-400 block uppercase">Valor Adm.</span>
+              <span class="text-sm font-bold text-slate-700 block mt-0.5">{{
+                ownerData()?.admon_value | currency
+              }}</span>
+            </div>
+
+            <!-- Lista Precios -->
+            <div class="bg-slate-50/70 rounded-lg p-3 border border-slate-100">
+              <span class="text-xs font-semibold text-slate-400 block uppercase"
+                >Lista Precios</span
+              >
+              <span class="text-sm font-medium text-slate-700 block mt-0.5">{{
+                ownerData()?.prices_list || '—'
+              }}</span>
+            </div>
+
+            <!-- Plan Pago -->
+            <div class="bg-slate-50/70 rounded-lg p-3 border border-slate-100">
+              <span class="text-xs font-semibold text-slate-400 block uppercase">Plan de Pago</span>
+              <span class="text-sm font-medium text-slate-700 block mt-0.5">{{
+                ownerData()?.payment_plan || '—'
+              }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. TABLA DE VEHÍCULOS (Idéntica a VehiclesComponent) -->
+        <div
+          class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden flex flex-col"
+        >
+          <div
+            class="px-5 py-3 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between"
+          >
+            <div class="flex items-center gap-2">
+              <mat-icon class="text-blue-600 text-lg !w-5 !h-5 leading-none"
+                >directions_car</mat-icon
+              >
+              <h3 class="font-bold text-slate-800 text-sm">Vehículos del Cliente</h3>
+            </div>
+            <span
+              class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-200"
+            >
+              {{ dataSource.data.length }}
+              {{ dataSource.data.length === 1 ? 'vehículo' : 'vehículos' }}
+            </span>
+          </div>
+
+          <div class="overflow-x-auto">
+            @if (dataSource.data.length > 0) {
+              <table mat-table [dataSource]="dataSource" class="w-full min-w-[1200px]">
+                <ng-container matColumnDef="id">
+                  <th mat-header-cell *matHeaderCellDef class="pl-6 w-20">Código</th>
+                  <td mat-cell *matCellDef="let vehicle" class="pl-6 font-medium text-slate-600">
+                    {{ vehicle.id }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="plate">
+                  <th mat-header-cell *matHeaderCellDef>Placa</th>
+                  <td mat-cell *matCellDef="let vehicle" class="text-slate-700 font-bold uppercase">
+                    {{ vehicle.plate }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="owner_name">
+                  <th mat-header-cell *matHeaderCellDef>Cliente</th>
+                  <td mat-cell *matCellDef="let vehicle">
+                    <span class="truncate max-w-[150px] block" [title]="vehicle.owner_name">{{
+                      vehicle.owner_name
+                    }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="type_name">
+                  <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                  <td mat-cell *matCellDef="let vehicle">{{ vehicle.type_name }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="status_name">
+                  <th mat-header-cell *matHeaderCellDef>Estado</th>
+                  <td mat-cell *matCellDef="let vehicle">
+                    <span
+                      class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-bold border border-slate-200"
+                    >
+                      {{ vehicle.status_name }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="payment_plan">
+                  <th mat-header-cell *matHeaderCellDef>Plan Pago</th>
+                  <td mat-cell *matCellDef="let vehicle">{{ vehicle.payment_plan }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="cuoadmon">
+                  <th mat-header-cell *matHeaderCellDef>Cuota Adm.</th>
+                  <td mat-cell *matCellDef="let vehicle">{{ vehicle.cuoadmon | currency }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="installation_method">
+                  <th mat-header-cell *matHeaderCellDef>Met. Instalación</th>
+                  <td mat-cell *matCellDef="let vehicle">{{ vehicle.installation_method }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="gps_status">
+                  <th mat-header-cell *matHeaderCellDef>Estado GPS</th>
+                  <td mat-cell *matCellDef="let vehicle">
+                    <span
+                      class="px-2 py-1 rounded text-xs font-bold border"
+                      [class.bg-green-100]="vehicle.gps_status === 'Prendido'"
+                      [class.text-green-700]="vehicle.gps_status === 'Prendido'"
+                      [class.border-green-200]="vehicle.gps_status === 'Prendido'"
+                      [class.bg-red-100]="vehicle.gps_status === 'Apagado'"
+                      [class.text-red-700]="vehicle.gps_status === 'Apagado'"
+                      [class.border-red-200]="vehicle.gps_status === 'Apagado'"
+                    >
+                      {{ vehicle.gps_status }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="gps_serial">
+                  <th mat-header-cell *matHeaderCellDef>Serial GPS</th>
+                  <td mat-cell *matCellDef="let vehicle">{{ vehicle.gps_serial }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="cel_serial">
+                  <th mat-header-cell *matHeaderCellDef>Serial Cel.</th>
+                  <td mat-cell *matCellDef="let vehicle">{{ vehicle.cel_serial }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="cel_num">
+                  <th mat-header-cell *matHeaderCellDef class="pr-6">Num. Celular</th>
+                  <td mat-cell *matCellDef="let vehicle" class="pr-6">{{ vehicle.cel_num }}</td>
+                </ng-container>
+
+                <tr
+                  mat-header-row
+                  *matHeaderRowDef="displayedColumns"
+                  class="bg-slate-50 h-11 sticky top-0 z-10 whitespace-nowrap text-xs font-bold text-slate-600"
+                ></tr>
+
+                <tr
+                  mat-row
+                  *matRowDef="let row; columns: displayedColumns"
+                  class="h-12 hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0 bg-white whitespace-nowrap"
+                ></tr>
+              </table>
+            } @else {
+              <div class="py-12 px-6 flex flex-col items-center justify-center text-center">
+                <mat-icon class="text-slate-300 !w-12 !h-12 text-[48px] leading-none mb-3"
+                  >directions_car</mat-icon
+                >
+                <p class="text-sm font-semibold text-slate-700">
+                  Este cliente no tiene vehículos registrados
+                </p>
+                <p class="text-xs text-slate-400 mt-1">
+                  Cuando se asignen vehículos a este cliente, aparecerán listados aquí.
+                </p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="flex-1 flex flex-col items-center justify-center bg-white p-12">
+        <mat-icon class="text-rose-400 !w-12 !h-12 text-[48px] leading-none mb-3"
+          >error_outline</mat-icon
+        >
+        <p class="text-sm font-semibold text-slate-700">
+          No se pudo cargar la información del cliente
+        </p>
+        <button mat-flat-button color="primary" class="mt-4" (click)="loadOwnerDetails()">
+          Reintentar
+        </button>
+      </div>
+    }
+  </mat-dialog-content>
+
+  <!-- PIE DEL DIALOG -->
+  <div class="border-t border-slate-100 px-6 py-3 bg-white flex justify-end shrink-0">
+    <button mat-stroked-button (click)="closeDialog()">Cerrar</button>
+  </div>
+</div>

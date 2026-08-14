@@ -1,0 +1,153 @@
+<div
+  class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col h-[calc(100vh-21rem)] md:h-[calc(100vh-19rem)]"
+>
+  <div
+    class="p-5 border-b border-slate-100 bg-white flex items-center shrink-0 z-20 relative rounded-t-xl"
+  >
+    <app-search-header
+      class="w-full"
+      [initialValue]="currentFilterValue"
+      (search)="applyFilter($event)"
+    >
+    </app-search-header>
+  </div>
+
+  <div class="flex-1 overflow-hidden p-4 bg-white rounded-b-xl flex flex-col relative">
+    <!-- Loading overlay -->
+    @if (isLoading) {
+      <div class="absolute inset-0 bg-white/50 z-30 flex items-center justify-center">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    }
+
+    <div class="flex-1 overflow-auto rounded-lg border border-slate-100 bg-slate-50 relative">
+      @if (dataSource.data.length > 0) {
+        <table mat-table [dataSource]="dataSource" class="w-full min-w-[1300px]">
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef class="pl-6 w-16">ID</th>
+            <td mat-cell *matCellDef="let item" class="pl-6 font-medium text-slate-600">
+              {{ item.id }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="code">
+            <th mat-header-cell *matHeaderCellDef>Código</th>
+            <td mat-cell *matCellDef="let item" class="font-bold text-slate-700">
+              {{ item.code }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="barcode">
+            <th mat-header-cell *matHeaderCellDef>Cód. Barras</th>
+            <td mat-cell *matCellDef="let item" class="text-slate-600">
+              {{ item.barcode }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Descripción / Nombre</th>
+            <td mat-cell *matCellDef="let item" class="text-slate-800 font-medium">
+              <span class="truncate max-w-[200px] block" [title]="item.name">{{ item.name }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="presentation">
+            <th mat-header-cell *matHeaderCellDef>Presentación</th>
+            <td mat-cell *matCellDef="let item">{{ item.presentation }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="group_name">
+            <th mat-header-cell *matHeaderCellDef>Grupo</th>
+            <td mat-cell *matCellDef="let item">{{ item.group_name }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="brand_name">
+            <th mat-header-cell *matHeaderCellDef>Marca</th>
+            <td mat-cell *matCellDef="let item">{{ item.brand_name }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="stock">
+            <th mat-header-cell *matHeaderCellDef>Stock</th>
+            <td mat-cell *matCellDef="let item" class="font-semibold text-slate-700">
+              {{ item.stock }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="cost">
+            <th mat-header-cell *matHeaderCellDef>Costo</th>
+            <td mat-cell *matCellDef="let item">{{ item.cost | currency }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="sale_price">
+            <th mat-header-cell *matHeaderCellDef>Precio Venta</th>
+            <td mat-cell *matCellDef="let item">{{ item.sale_price | currency }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="total">
+            <th mat-header-cell *matHeaderCellDef>Total</th>
+            <td mat-cell *matCellDef="let item" class="font-medium text-slate-700">
+              {{ item.total | currency }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef class="pr-6">Estado</th>
+            <td mat-cell *matCellDef="let item" class="pr-6">
+              <span
+                class="px-2 py-1 rounded text-xs font-bold border"
+                [class.bg-green-100]="item.status === 'Activo'"
+                [class.text-green-700]="item.status === 'Activo'"
+                [class.border-green-200]="item.status === 'Activo'"
+                [class.bg-amber-100]="item.status === 'Suspendido'"
+                [class.text-amber-700]="item.status === 'Suspendido'"
+                [class.border-amber-200]="item.status === 'Suspendido'"
+                [class.bg-rose-100]="item.status === 'Retirado'"
+                [class.text-rose-700]="item.status === 'Retirado'"
+                [class.border-rose-200]="item.status === 'Retirado'"
+              >
+                {{ item.status }}
+              </span>
+            </td>
+          </ng-container>
+
+          <tr
+            mat-header-row
+            *matHeaderRowDef="displayedColumns"
+            class="bg-slate-50 h-12 sticky top-0 z-10 whitespace-nowrap"
+          ></tr>
+
+          <tr
+            mat-row
+            *matRowDef="let row; columns: displayedColumns"
+            class="h-14 hover:bg-slate-100/50 transition-colors border-b border-slate-100 last:border-0 bg-white whitespace-nowrap"
+          ></tr>
+        </table>
+      }
+
+      @if (!isLoading && dataSource.data.length === 0 && currentFilterValue) {
+        <div class="h-full flex items-center justify-center bg-white">
+          <app-no-result-data [query]="currentFilterValue"></app-no-result-data>
+        </div>
+      }
+
+      @if (!isLoading && dataSource.data.length === 0 && !currentFilterValue) {
+        <div
+          class="h-full flex items-center justify-center bg-white p-10 text-slate-500 flex-col gap-2"
+        >
+          <mat-icon class="text-slate-300 scale-150 mb-2">inventory_2</mat-icon>
+          <p>No hay artículos de inventario creados todavía.</p>
+        </div>
+      }
+    </div>
+
+    <!-- Paginator -->
+    <mat-paginator
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      (page)="onPageChange($event)"
+      class="mt-4 border-t border-slate-100 pt-2 shrink-0 bg-transparent"
+    >
+    </mat-paginator>
+  </div>
+</div>
