@@ -32,7 +32,6 @@ export class InventoryComponent implements OnInit, AfterViewInit {
     'presentation',
     'group_name',
     'brand_name',
-    'location',
     'stock',
     'cost',
     'sale_price',
