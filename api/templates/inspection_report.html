@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Control Inspecciones de GPS</title>
     <style>
       body {
-        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-family: "Inter", "Segoe UI", sans-serif;
         margin: 0;
         padding: 32px 40px;
         line-height: 1.5;
@@ -41,18 +41,18 @@
       }
 
       .box dt::after {
-        content: ': ';
+        content: ": ";
       }
- 
+
       .box dd {
         display: inline;
         margin: 0;
         font-weight: 500;
         color: #1a1a1a;
       }
- 
+
       .box dt::before {
-        content: '';
+        content: "";
         display: block;
       }
 
@@ -108,7 +108,7 @@
         margin: 0 0 10px 0;
         padding-bottom: 6px;
         border-bottom: 1px solid #e0e0e0;
-        text-align: center; 
+        text-align: center;
       }
 
       /* Detalles generales en Tabla (Invisible) */
@@ -125,7 +125,7 @@
         padding: 6px 16px 6px 0;
         border: none;
       }
-      
+
       .detalles-tabla td:nth-child(even) {
         padding-left: 16px;
         padding-right: 0;
@@ -136,14 +136,14 @@
         display: block;
         padding: 6px 0;
         border-bottom: 1px solid #f0f0f0;
-        min-height: 46px; 
+        min-height: 46px;
         box-sizing: border-box;
       }
 
       /* Títulos internos de la tabla MÁS GRANDES */
       .detalle-label {
         display: block;
-        font-size: 13px; 
+        font-size: 13px;
         font-weight: 600;
         color: #777;
         text-transform: uppercase;
@@ -173,38 +173,38 @@
 
       /* Fotos */
       .evidencia {
-          page-break-before: always;
+        page-break-before: always;
       }
 
       .galeria {
-          width: 100%;
-          margin: 0;
+        width: 100%;
+        margin: 0;
       }
 
       .foto-item {
-          width: 100%;
-          page-break-inside: avoid;
-          break-inside: avoid;
-          text-align: center;
-          padding: 0 10mm;
-          box-sizing: border-box;
+        width: 100%;
+        page-break-inside: avoid;
+        break-inside: avoid;
+        text-align: center;
+        padding: 0 10mm;
+        box-sizing: border-box;
       }
 
       .foto-item + .foto-item {
-          page-break-before: always;
-          break-before: page;
+        page-break-before: always;
+        break-before: page;
       }
 
       .foto-item img {
-          width: 100%;
-          max-width: 100%;
-          max-height: 75vh;
-          height: auto;
-          display: block;
-          margin: 0 auto;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          object-fit: contain;
+        width: 100%;
+        max-width: 100%;
+        max-height: 75vh;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        object-fit: contain;
       }
 
       /* Firma - CENTRADO COMPLETO */
@@ -249,13 +249,16 @@
 
       /* Print */
       @media print {
-        body { padding: 20px 28px; }
-        .foto-item img { max-height: 8.25in; }
+        body {
+          padding: 20px 28px;
+        }
+        .foto-item img {
+          max-height: 8.25in;
+        }
       }
     </style>
   </head>
   <body>
-
     <!-- <div class="doc-header">
       <div class="box">
         <dt>Fecha</dt>
@@ -273,19 +276,25 @@
 
     <div class="seccion">
       <p class="seccion-titulo">Información General</p>
-      
+
       <table class="detalles-tabla">
         <tr>
           <td>
             <div class="detalle-item">
               <span class="detalle-label">Id Inspección</span>
-              <span class="detalle-valor">{{ data_view.inspection.id if data_view.inspection.id else '&nbsp;' }}</span>
+              <span class="detalle-valor"
+                >{{ data_view.inspection.id if data_view.inspection.id else
+                '&nbsp;' }}</span
+              >
             </div>
           </td>
           <td>
             <div class="detalle-item">
               <span class="detalle-label">Tipo de Inspección</span>
-              <span class="detalle-valor">{{ data_view.inspection.inspection_type if data_view.inspection.inspection_type else '&nbsp;' }}</span>
+              <span class="detalle-valor"
+                >{{ data_view.inspection.inspection_type if
+                data_view.inspection.inspection_type else '&nbsp;' }}</span
+              >
             </div>
           </td>
         </tr>
@@ -293,13 +302,19 @@
           <td>
             <div class="detalle-item">
               <span class="detalle-label">Cliente</span>
-              <span class="detalle-valor">{{ data_view.inspection.owner_name if data_view.inspection.owner_name else '&nbsp;' }}</span>
+              <span class="detalle-valor"
+                >{{ data_view.inspection.owner_name if
+                data_view.inspection.owner_name else '&nbsp;' }}</span
+              >
             </div>
           </td>
           <td>
             <div class="detalle-item">
               <span class="detalle-label">Placa</span>
-              <span class="detalle-valor">{{ data_view.inspection.plate if data_view.inspection.plate else '&nbsp;' }}</span>
+              <span class="detalle-valor"
+                >{{ data_view.inspection.plate if data_view.inspection.plate
+                else '&nbsp;' }}</span
+              >
             </div>
           </td>
         </tr>
@@ -307,41 +322,19 @@
           <td>
             <div class="detalle-item">
               <span class="detalle-label">Estado del Vehículo</span>
-              <span class="detalle-valor">{{ data_view.inspection.vehicle_status if data_view.inspection.vehicle_status else '&nbsp;' }}</span>
+              <span class="detalle-valor"
+                >{{ data_view.inspection.vehicle_status if
+                data_view.inspection.vehicle_status else '&nbsp;' }}</span
+              >
             </div>
           </td>
           <td>
             <div class="detalle-item">
               <span class="detalle-label">Forma de Instalación</span>
-              <span class="detalle-valor">{{ data_view.inspection.installation_way if data_view.inspection.installation_way else '&nbsp;' }}</span>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <div class="detalle-item">
-              <span class="detalle-label">Marca GPS</span>
-              <span class="detalle-valor">{{ data_view.inspection.gps_brand if data_view.inspection.gps_brand else '&nbsp;' }}</span>
-            </div>
-          </td>
-          <td>
-            <div class="detalle-item">
-              <span class="detalle-label">Serial GPS</span>
-              <span class="detalle-valor">{{ data_view.inspection.gps_serial if data_view.inspection.gps_serial else '&nbsp;' }}</span>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <div class="detalle-item">
-              <span class="detalle-label">Número Celular</span>
-              <span class="detalle-valor">{{ data_view.inspection.celular_number if data_view.inspection.celular_number else '&nbsp;' }}</span>
-            </div>
-          </td>
-          <td>
-            <div class="detalle-item">
-              <span class="detalle-label">Serial Celular</span>
-              <span class="detalle-valor">{{ data_view.inspection.celular_serial if data_view.inspection.celular_serial else '&nbsp;' }}</span>
+              <span class="detalle-valor"
+                >{{ data_view.inspection.installation_way if
+                data_view.inspection.installation_way else '&nbsp;' }}</span
+              >
             </div>
           </td>
         </tr>
@@ -349,7 +342,10 @@
           <td>
             <div class="detalle-item">
               <span class="detalle-label">Inspección realizada por</span>
-              <span class="detalle-valor">{{ data_view.inspection.inspection_user if data_view.inspection.inspection_user else '&nbsp;' }}</span>
+              <span class="detalle-valor"
+                >{{ data_view.inspection.inspection_user if
+                data_view.inspection.inspection_user else '&nbsp;' }}</span
+              >
             </div>
           </td>
           <td>
@@ -357,16 +353,13 @@
               <span class="detalle-label">Fecha / Hora</span>
               <span class="detalle-valor">
                 {% if data_view.inspection.date or data_view.inspection.hour %}
-                  {{ data_view.inspection.date }} - {{ data_view.inspection.hour }}
-                {% else %}
-                  &nbsp;
-                {% endif %}
+                {{ data_view.inspection.date }} - {{ data_view.inspection.hour
+                }} {% else %} &nbsp; {% endif %}
               </span>
             </div>
           </td>
         </tr>
       </table>
-
     </div>
 
     <div class="seccion">
@@ -380,22 +373,23 @@
     </div>
 
     <div class="seccion evidencia">
-      <p class="seccion-titulo">Evidencia Fotográfica - {{ data_view.inspection.photos|length }} fotos</p>
+      <p class="seccion-titulo">
+        Evidencia Fotográfica - {{ data_view.inspection.photos|length }} fotos
+      </p>
       <div class="galeria">
         {% for photo in data_view.inspection.photos %}
-          <div class="foto-item">
-            <img src="{{ photo }}">
-          </div>
+        <div class="foto-item">
+          <img src="{{ photo }}" />
+        </div>
         {% endfor %}
       </div>
     </div>
 
     <div class="seccion-firma">
-      <img src="{{ data_view.inspection.signature }}">
+      <img src="{{ data_view.inspection.signature }}" />
       <p class="firma-nombre">{{ data_view.inspection.owner_name }}</p>
       <div class="linea-firma"></div>
       <p class="firma-rol">Firma Propietario</p>
     </div>
-
   </body>
 </html>
