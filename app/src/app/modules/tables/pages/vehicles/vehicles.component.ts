@@ -54,6 +54,12 @@ export class VehiclesComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
+    const cached = this.tablesService.getVehiclesCache();
+    if (cached) {
+      this.currentFilterValue = cached.search;
+      this.pageNumber = cached.page;
+      this.pageSize = cached.size;
+    }
     this.calculateDynamicPageSize(false);
     this.loadVehicles();
   }
@@ -89,13 +95,24 @@ export class VehiclesComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // Paginator is initialized, we handle page changes via (page) event in HTML
+    if (this.paginator) {
+      this.paginator.pageIndex = this.pageNumber - 1;
+    }
   }
 
-  loadVehicles() {
-    this.isLoading = true;
+  loadVehicles(forceRefresh = false) {
+    const isCached = this.tablesService.hasValidVehiclesCache(
+      this.pageNumber,
+      this.pageSize,
+      this.currentFilterValue,
+    );
+
+    if (!isCached) {
+      this.isLoading = true;
+    }
+
     this.tablesService
-      .getVehicles(this.pageNumber, this.pageSize, this.currentFilterValue)
+      .getVehicles(this.pageNumber, this.pageSize, this.currentFilterValue, forceRefresh)
       .pipe(
         finalize(() => {
           this.isLoading = false;

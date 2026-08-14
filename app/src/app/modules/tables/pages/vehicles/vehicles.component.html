@@ -4,7 +4,12 @@
   <div
     class="p-5 border-b border-slate-100 bg-white flex items-center shrink-0 z-20 relative rounded-t-xl"
   >
-    <app-search-header class="w-full" (search)="applyFilter($event)"> </app-search-header>
+    <app-search-header
+      class="w-full"
+      [initialValue]="currentFilterValue"
+      (search)="applyFilter($event)"
+    >
+    </app-search-header>
   </div>
 
   <div class="flex-1 overflow-hidden p-4 bg-white rounded-b-xl flex flex-col relative">

@@ -49,6 +49,12 @@ export class OwnersComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
+    const cached = this.tablesService.getOwnersCache();
+    if (cached) {
+      this.currentFilterValue = cached.search;
+      this.pageNumber = cached.page;
+      this.pageSize = cached.size;
+    }
     this.calculateDynamicPageSize(false);
     this.loadOwners();
   }
@@ -84,13 +90,24 @@ export class OwnersComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // Paginator is initialized
+    if (this.paginator) {
+      this.paginator.pageIndex = this.pageNumber - 1;
+    }
   }
 
-  loadOwners() {
-    this.isLoading = true;
+  loadOwners(forceRefresh = false) {
+    const isCached = this.tablesService.hasValidOwnersCache(
+      this.pageNumber,
+      this.pageSize,
+      this.currentFilterValue,
+    );
+
+    if (!isCached) {
+      this.isLoading = true;
+    }
+
     this.tablesService
-      .getOwners(this.pageNumber, this.pageSize, this.currentFilterValue)
+      .getOwners(this.pageNumber, this.pageSize, this.currentFilterValue, forceRefresh)
       .pipe(
         finalize(() => {
           this.isLoading = false;

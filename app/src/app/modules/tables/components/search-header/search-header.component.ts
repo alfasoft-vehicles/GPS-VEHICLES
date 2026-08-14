@@ -10,6 +10,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 })
 export class SearchHeaderComponent implements OnInit, OnDestroy {
   actionButtonLabel = input<string>();
+  initialValue = input<string>('');
 
   search = output<string>();
   add = output<void>();
@@ -20,6 +21,10 @@ export class SearchHeaderComponent implements OnInit, OnDestroy {
   private searchSub?: Subscription;
 
   ngOnInit() {
+    if (this.initialValue()) {
+      this.query.set(this.initialValue());
+    }
+
     this.searchSub = this.searchSubject
       .pipe(debounceTime(400), distinctUntilChanged())
       .subscribe((value) => {

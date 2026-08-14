@@ -54,6 +54,12 @@ export class InventoryComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
+    const cached = this.tablesService.getInventoryCache();
+    if (cached) {
+      this.currentFilterValue = cached.search;
+      this.pageNumber = cached.page;
+      this.pageSize = cached.size;
+    }
     this.calculateDynamicPageSize(false);
     this.loadInventory();
   }
@@ -89,13 +95,24 @@ export class InventoryComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // Paginator is initialized
+    if (this.paginator) {
+      this.paginator.pageIndex = this.pageNumber - 1;
+    }
   }
 
-  loadInventory() {
-    this.isLoading = true;
+  loadInventory(forceRefresh = false) {
+    const isCached = this.tablesService.hasValidInventoryCache(
+      this.pageNumber,
+      this.pageSize,
+      this.currentFilterValue,
+    );
+
+    if (!isCached) {
+      this.isLoading = true;
+    }
+
     this.tablesService
-      .getInventory(this.pageNumber, this.pageSize, this.currentFilterValue)
+      .getInventory(this.pageNumber, this.pageSize, this.currentFilterValue, forceRefresh)
       .pipe(
         finalize(() => {
           this.isLoading = false;
