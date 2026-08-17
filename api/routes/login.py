@@ -59,7 +59,8 @@ async def refresh_token(
             key="refresh_token",
             path=settings.COOKIE_PATH,
             httponly=True,
-            samesite=settings.COOKIE_SAMESITE
+            samesite=settings.COOKIE_SAMESITE,
+            secure=settings.COOKIE_SECURE
         )
         raise HTTPException(
             status_code=result['status_code'],
@@ -89,6 +90,7 @@ async def logout(response: Response):
         key="refresh_token",
         path=settings.COOKIE_PATH,
         httponly=True,
-        samesite=settings.COOKIE_SAMESITE
+        samesite=settings.COOKIE_SAMESITE,
+        secure=settings.COOKIE_SECURE
     )
     return MessageResponse(message="Sesión cerrada correctamente")
