@@ -21,11 +21,10 @@ export interface MenuOption {
 export class HomeComponent {
   menuOptions: MenuOption[] = [
     {
-      title: 'Tablas Informativas', // Le di un nombre más formal
-      description: 'Gestión de clientes, seriales, marcas y vehículos.', // Texto de soporte
+      title: 'Tablas Informativas',
+      description: 'Gestión de vehículos, clientes e inventario.',
       icon: 'table_view',
       route: '/tablas',
-      // Usamos gradientes sutiles o colores sólidos más amplios
       colorClass: 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white',
       iconBg: 'bg-indigo-100 group-hover:bg-white/20',
       borderColor: 'hover:border-indigo-200',

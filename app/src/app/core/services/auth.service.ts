@@ -10,11 +10,12 @@ export interface User {
 
 export interface LoginResponse {
   access_token: string;
-  refresh_token: string;
+  token_type?: string;
 }
 
 export interface RefreshTokenResponse {
   access_token: string;
+  token_type?: string;
 }
 
 @Injectable({
@@ -22,7 +23,6 @@ export interface RefreshTokenResponse {
 })
 export class AuthService {
   private readonly ACCESS_TOKEN_KEY = 'access_token';
-  private readonly REFRESH_TOKEN_KEY = 'refresh_token';
   private readonly USER_KEY = 'user';
 
   private http = inject(HttpClient);
@@ -32,10 +32,6 @@ export class AuthService {
 
   get accessToken(): string | null {
     return sessionStorage.getItem(this.ACCESS_TOKEN_KEY);
-  }
-
-  get refreshToken(): string | null {
-    return sessionStorage.getItem(this.REFRESH_TOKEN_KEY);
   }
 
   get user(): User | null {
@@ -51,7 +47,6 @@ export class AuthService {
 
   private saveSession(response: LoginResponse): void {
     sessionStorage.setItem(this.ACCESS_TOKEN_KEY, response.access_token);
-    sessionStorage.setItem(this.REFRESH_TOKEN_KEY, response.refresh_token);
   }
 
   private saveUser(user: User): void {
@@ -64,23 +59,28 @@ export class AuthService {
 
   private clearSession(): void {
     sessionStorage.removeItem(this.ACCESS_TOKEN_KEY);
-    sessionStorage.removeItem(this.REFRESH_TOKEN_KEY);
     sessionStorage.removeItem(this.USER_KEY);
   }
 
   // ---- API Methods ----
 
   login(username: string, password: string): Observable<User> {
-    return this.http.post<LoginResponse>(`${URLBASE}/users/login`, { username, password }).pipe(
-      switchMap((response) => {
-        this.saveSession(response);
-        return this.getUserInfo();
-      }),
-      tap((user) => this.saveUser(user)),
-      catchError((error) => {
-        return throwError(() => error);
-      }),
-    );
+    return this.http
+      .post<LoginResponse>(
+        `${URLBASE}/users/login`,
+        { username, password },
+        { withCredentials: true },
+      )
+      .pipe(
+        switchMap((response) => {
+          this.saveSession(response);
+          return this.getUserInfo();
+        }),
+        tap((user) => this.saveUser(user)),
+        catchError((error) => {
+          return throwError(() => error);
+        }),
+      );
   }
 
   getUserInfo(): Observable<User> {
@@ -88,27 +88,27 @@ export class AuthService {
   }
 
   refreshAccessToken(): Observable<RefreshTokenResponse> {
-    const refreshToken = this.refreshToken;
-
-    if (!refreshToken) {
-      return throwError(() => new Error('No refresh token available'));
-    }
-
     return this.http
-      .post<RefreshTokenResponse>(`${URLBASE}/users/refresh-token`, {
-        refresh_token: refreshToken,
-      })
+      .post<RefreshTokenResponse>(`${URLBASE}/users/refresh-token`, {}, { withCredentials: true })
       .pipe(
         tap((response) => this.updateAccessToken(response.access_token)),
         catchError((error) => {
-          this.logout();
+          this.clearSession();
+          this.router.navigate(['/login']);
           return throwError(() => error);
         }),
       );
   }
 
   logout(): void {
-    this.clearSession();
-    this.router.navigate(['/login']);
+    this.http
+      .post(`${URLBASE}/users/logout`, {}, { withCredentials: true })
+      .pipe(catchError(() => []))
+      .subscribe({
+        complete: () => {
+          this.clearSession();
+          this.router.navigate(['/login']);
+        },
+      });
   }
 }
