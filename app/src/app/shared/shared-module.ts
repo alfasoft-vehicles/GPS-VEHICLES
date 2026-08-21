@@ -19,8 +19,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
+
 @NgModule({
-  declarations: [],
+  declarations: [ConfirmDialogComponent],
   imports: [
     CommonModule,
     MatIconModule,
@@ -43,6 +45,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatProgressSpinnerModule,
   ],
   exports: [
+    ConfirmDialogComponent,
     MatIconModule,
     MatCardModule,
     MatToolbarModule,

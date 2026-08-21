@@ -18,4 +18,5 @@ export interface Vehicle {
   cel_serial?: string;
   cel_num?: string;
   date_created?: string;
+  is_unregistered?: boolean;
 }

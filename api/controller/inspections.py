@@ -55,17 +55,45 @@ async def inspections_types(db: Session):
 
 async def create_inspection(data: NewInspection, db: Session, current_user: dict):
   try:
-    vehicle = db.query(Vehiculos).filter(Vehiculos.ID == data.vehicle_id).first()
-    if not vehicle:
-      return JSONResponse(content={"message": "Vehicle not found"}, status_code=404)
+    is_unregistered_vehicle = bool(data.is_unregistered_vehicle or not data.vehicle_id)
+    is_unregistered_owner = bool(data.is_unregistered_owner)
 
-    owner = db.query(Propietarios).filter(Propietarios.ID == vehicle.ID_PROPIE).first()
-    if not owner:
-      return JSONResponse(content={"message": "Owner not found"}, status_code=404)
-    
-    inspection_type = db.query(TiposInspeccion).filter(TiposInspeccion.ID == data.inspection_type_id).first()
-    if not inspection_type:
-      return JSONResponse(content={"message": "Inspection type not found"}, status_code=404)
+    if is_unregistered_vehicle:
+      vehicle_id = ""
+      plate = (data.plate or "").strip().upper()
+      if is_unregistered_owner:
+        owner_id = ""
+        owner_name = (data.owner_name or "").strip()
+      else:
+        owner_id = (data.owner_id or "").strip()
+        if owner_id:
+          owner_db = db.query(Propietarios).filter(Propietarios.ID == owner_id).first()
+          owner_name = owner_db.NOMBRE.strip() if owner_db and owner_db.NOMBRE else (data.owner_name or "").strip()
+        else:
+          owner_name = (data.owner_name or "").strip()
+      
+      inspection_type = db.query(TiposInspeccion).filter(TiposInspeccion.ID == "01").first()
+      inspection_type_id = "01"
+      inspection_type_name = inspection_type.NOMBRE.strip() if inspection_type else "Revision General"
+    else:
+      vehicle = db.query(Vehiculos).filter(Vehiculos.ID == data.vehicle_id).first()
+      if not vehicle:
+        return JSONResponse(content={"message": "Vehicle not found"}, status_code=404)
+
+      owner = db.query(Propietarios).filter(Propietarios.ID == vehicle.ID_PROPIE).first()
+      if not owner:
+        return JSONResponse(content={"message": "Owner not found"}, status_code=404)
+      
+      inspection_type = db.query(TiposInspeccion).filter(TiposInspeccion.ID == data.inspection_type_id).first()
+      if not inspection_type:
+        return JSONResponse(content={"message": "Inspection type not found"}, status_code=404)
+      
+      vehicle_id = vehicle.ID
+      plate = vehicle.PLACA
+      owner_id = vehicle.ID_PROPIE
+      owner_name = owner.NOMBRE
+      inspection_type_id = inspection_type.ID
+      inspection_type_name = inspection_type.NOMBRE
     
     user_id = current_user.get("codigo")
     user = db.query(Usuarios).filter(Usuarios.ID == user_id).first()
@@ -81,12 +109,12 @@ async def create_inspection(data: NewInspection, db: Session, current_user: dict
     new_inspection = Inspecciones(
       FECHA=date,
       HORA=time,
-      ID_VEHICULO=vehicle.ID,
-      PLACA=vehicle.PLACA,
-      PROPIETARIO=vehicle.ID_PROPIE,
-      NOMPROPI=owner.NOMBRE,
-      TIPO_INSPEC=inspection_type.ID,
-      NOMINSPEC=inspection_type.NOMBRE,
+      ID_VEHICULO=vehicle_id,
+      PLACA=plate,
+      PROPIETARIO=owner_id,
+      NOMPROPI=owner_name,
+      TIPO_INSPEC=inspection_type_id,
+      NOMINSPEC=inspection_type_name,
       ID_MARCA=data.gps_brand_id if data.gps_brand_id else "",
       NOMMARCA=brand_name,
       GPS_SERIAL=data.gps_serial,
@@ -117,7 +145,7 @@ async def upload_images(inspection_id: int, db: Session, images: List[UploadFile
     if not inspection:
       return JSONResponse(content={"message": "Inspection not found"}, status_code=404)
 
-    vehicle_id = inspection.ID_VEHICULO
+    vehicle_id = (inspection.ID_VEHICULO or "").strip()
 
     available_slots = []
     for i in range(1, 9):
@@ -131,7 +159,13 @@ async def upload_images(inspection_id: int, db: Session, images: List[UploadFile
         status_code=400
       )
         
-    full_inspection_path = os.path.join(upload_directory, "vehicles", vehicle_id, "inspections", str(inspection_id))
+    if vehicle_id:
+      full_inspection_path = os.path.join(upload_directory, "vehicles", vehicle_id, "inspections", str(inspection_id))
+      db_base_path = os.path.join("vehicles", vehicle_id, "inspections", str(inspection_id))
+    else:
+      full_inspection_path = os.path.join(upload_directory, "unregistered", str(inspection_id))
+      db_base_path = os.path.join("unregistered", str(inspection_id))
+
     os.makedirs(full_inspection_path, exist_ok=True)
 
     saved_count = 0
@@ -143,7 +177,7 @@ async def upload_images(inspection_id: int, db: Session, images: List[UploadFile
       with open(full_file_path, "wb") as buffer:
           shutil.copyfileobj(image.file, buffer)
       
-      relative_db_path = os.path.join("vehicles", vehicle_id, "inspections", str(inspection_id), new_filename)
+      relative_db_path = os.path.join(db_base_path, new_filename)
       normalized_path = relative_db_path.replace("\\", "/") 
       setattr(inspection, slot_name, normalized_path) 
       saved_count += 1
@@ -180,9 +214,15 @@ async def upload_signature(inspection_id: int, db: Session, signature: UploadFil
     if inspection.FIRMA:
       return JSONResponse(content={"message": "Ya existe una firma para esta inspección."}, status_code=400)
     
-    vehicle_id = inspection.ID_VEHICULO
+    vehicle_id = (inspection.ID_VEHICULO or "").strip()
 
-    full_signature_path = os.path.join(upload_directory, "vehicles", vehicle_id, "inspections", str(inspection_id))
+    if vehicle_id:
+      full_signature_path = os.path.join(upload_directory, "vehicles", vehicle_id, "inspections", str(inspection_id))
+      db_base_path = os.path.join("vehicles", vehicle_id, "inspections", str(inspection_id))
+    else:
+      full_signature_path = os.path.join(upload_directory, "unregistered", str(inspection_id))
+      db_base_path = os.path.join("unregistered", str(inspection_id))
+
     os.makedirs(full_signature_path, exist_ok=True)
 
     _, ext = os.path.splitext(signature.filename)
@@ -192,7 +232,7 @@ async def upload_signature(inspection_id: int, db: Session, signature: UploadFil
     with open(full_file_path, "wb") as buffer:
       shutil.copyfileobj(signature.file, buffer)
     
-    relative_db_path = os.path.join("vehicles", vehicle_id, "inspections", str(inspection_id), new_filename)
+    relative_db_path = os.path.join(db_base_path, new_filename)
     normalized_path = relative_db_path.replace("\\", "/") 
     inspection.FIRMA = normalized_path 
 
@@ -252,16 +292,18 @@ async def inspections_list(data: InspectionInfo, db: Session, current_user: dict
 
       user = db.query(Usuarios).filter(Usuarios.ID == str(inspection.USUARIO)).first()
       
+      owner_display = owners_dict.get(inspection.PROPIETARIO) if inspection.PROPIETARIO and inspection.PROPIETARIO.strip() else (inspection.NOMPROPI or "")
+
       inspections_data.append({
         "id": inspection.ID,
         "date": inspection.FECHA.strftime('%d-%m-%Y') + ' ' + inspection.HORA.strftime('%H:%M') if inspection.FECHA and inspection.HORA else None,
         "id_inspection_type": inspection.TIPO_INSPEC,
-        "inspection_type": inspections_dict.get(inspection.TIPO_INSPEC, ""),
+        "inspection_type": inspections_dict.get(inspection.TIPO_INSPEC, inspection.NOMINSPEC or ""),
         "details": inspection.DESCRIPCION,
-        "vehicle_id": inspection.ID_VEHICULO,
-        "plate": inspection.PLACA,
-        "owner_id": inspection.PROPIETARIO,
-        "owner": owners_dict.get(inspection.PROPIETARIO, ""),
+        "vehicle_id": inspection.ID_VEHICULO or "",
+        "plate": inspection.PLACA or "",
+        "owner_id": inspection.PROPIETARIO or "",
+        "owner": owner_display,
         "status": inspection.ESTADO,
         "can_edit": can_edit,
         "photos": photos,
@@ -288,20 +330,24 @@ async def inspection_details(inspection_id: int, db: Session):
 
     await update_expired_inspections(db, inspections_list=[inspection])
 
-    vehicle = db.query(Vehiculos).filter(Vehiculos.ID == inspection.ID_VEHICULO).first()
-    if not vehicle:
-      return JSONResponse(content={"message": "Vehicle not found"}, status_code=404)
+    vehicle_id = (inspection.ID_VEHICULO or "").strip()
+    vehicle = None
+    vehicle_status = ""
+    if vehicle_id:
+      vehicle = db.query(Vehiculos).filter(Vehiculos.ID == vehicle_id).first()
+      if vehicle:
+        status = db.query(Estados).filter(Estados.ID == vehicle.ID_ESTADO).first()
+        vehicle_status = status.ID + ' - ' + status.NOMBRE if status else ''
 
-    owner = db.query(Propietarios).filter(Propietarios.ID == inspection.PROPIETARIO).first()
-    if not owner:
-      return JSONResponse(content={"message": "Owner not found"}, status_code=404)
+    owner_id = (inspection.PROPIETARIO or "").strip()
+    owner_name = inspection.NOMPROPI or ""
+    if owner_id:
+      owner = db.query(Propietarios).filter(Propietarios.ID == owner_id).first()
+      if owner and owner.NOMBRE:
+        owner_name = owner.NOMBRE
     
     inspection_type = db.query(TiposInspeccion).filter(TiposInspeccion.ID == inspection.TIPO_INSPEC).first()
-    if not inspection_type:
-      return JSONResponse(content={"message": "Inspection type not found"}, status_code=404)
-
-    status = db.query(Estados).filter(Estados.ID == vehicle.ID_ESTADO).first()
-    vehicle_status = status.ID + ' - ' + status.NOMBRE if status else ''
+    inspection_type_name = (inspection.TIPO_INSPEC + ' - ' + inspection_type.NOMBRE) if inspection_type else (inspection.NOMINSPEC or "")
 
     photos = []
     for i in range(1, 9): 
@@ -318,11 +364,11 @@ async def inspection_details(inspection_id: int, db: Session):
       "id": inspection.ID,
       "date": inspection.FECHA.strftime('%d-%m-%Y') if inspection.FECHA else None,
       "time": inspection.HORA.strftime('%H:%M') if inspection.HORA else None,
-      "owner": inspection.PROPIETARIO,
-      "owner_name": owner.NOMBRE,
-      "inspection_type": inspection.TIPO_INSPEC + ' - ' + inspection_type.NOMBRE,
-      "vehicle_id": inspection.ID_VEHICULO,
-      "plate": vehicle.PLACA,
+      "owner": owner_id,
+      "owner_name": owner_name,
+      "inspection_type": inspection_type_name,
+      "vehicle_id": vehicle_id,
+      "plate": inspection.PLACA or (vehicle.PLACA if vehicle else ""),
       "vehicle_status": vehicle_status,
       "gps_brand_id": inspection.ID_MARCA.strip() if inspection.ID_MARCA else "",
       "gps_brand": inspection.NOMMARCA.strip() if inspection.NOMMARCA else (brand.NOMBRE.strip() if brand else ""),

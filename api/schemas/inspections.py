@@ -11,6 +11,11 @@ class NewInspection(BaseModel):
   installation_way: str
   description: str
   notes: Optional[str]
+  plate: Optional[str] = ""
+  owner_name: Optional[str] = ""
+  owner_id: Optional[str] = ""
+  is_unregistered_vehicle: Optional[bool] = False
+  is_unregistered_owner: Optional[bool] = False
 
 class InspectionInfo(BaseModel):
   owner: Optional[str] = None
