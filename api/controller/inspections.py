@@ -6,6 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi import UploadFile, File, BackgroundTasks
 from typing import List
 from sqlalchemy.orm import Session
+from config.dbconnection import SessionLocal
 from models.tiposinspeccion import TiposInspeccion
 from models.inspecciones import Inspecciones
 from models.vehiculos import Vehiculos
@@ -14,7 +15,7 @@ from models.usuarios import Usuarios
 from models.estados import Estados
 from models.marcas import Marcas
 from schemas.inspections import NewInspection, InspectionInfo
-from utils.inspections import update_expired_inspections
+from utils.inspections import update_expired_inspections, migrate_unregistered_inspections_task
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor
 from utils.pdf import html2pdf
@@ -245,8 +246,11 @@ async def upload_signature(inspection_id: int, db: Session, signature: UploadFil
 
 # ---------------------------------------------------------------------------------------------------------------
 
-async def inspections_list(data: InspectionInfo, db: Session, current_user: dict):
+async def inspections_list(data: InspectionInfo, db: Session, current_user: dict, background_tasks: BackgroundTasks = None):
   try:
+    if background_tasks:
+      background_tasks.add_task(migrate_unregistered_inspections_task)
+
     filters = []
 
     if data.initial_date != '' and data.final_date != '':
@@ -381,7 +385,9 @@ async def inspection_details(inspection_id: int, db: Session):
       "status": inspection.ESTADO,
       "user": user.NOMBRE if user else "",
       "photos": photos,
-      "signature": 1 if inspection.FIRMA and inspection.FIRMA.strip() else 0
+      "signature": 1 if inspection.FIRMA and inspection.FIRMA.strip() else 0,
+      "is_unregistered_vehicle": not vehicle_id,
+      "is_unregistered_owner": not owner_id,
     }
 
     return JSONResponse(content=jsonable_encoder(inspection_data), status_code=200)
@@ -434,10 +440,13 @@ async def inspection_report(inspection_id: int, db: Session, current_user: dict)
     
     inspection_type = db.query(TiposInspeccion).filter(TiposInspeccion.ID == inspection.TIPO_INSPEC).first()
 
-    vehicle = db.query(Vehiculos).filter(Vehiculos.ID == inspection.ID_VEHICULO).first()
+    vehicle_id = (inspection.ID_VEHICULO or "").strip()
+    vehicle = db.query(Vehiculos).filter(Vehiculos.ID == vehicle_id).first() if vehicle_id else None
 
-    status = db.query(Estados).filter(Estados.ID == vehicle.ID_ESTADO).first()
-    vehicle_status = status.ID + ' - ' + status.NOMBRE if status else ''
+    vehicle_status = ''
+    if vehicle:
+      status = db.query(Estados).filter(Estados.ID == vehicle.ID_ESTADO).first()
+      vehicle_status = status.ID + ' - ' + status.NOMBRE if status else ''
 
     user_id = current_user.get("codigo")
     user_name = db.query(Usuarios).filter(Usuarios.ID == user_id).first()
@@ -453,15 +462,26 @@ async def inspection_report(inspection_id: int, db: Session, current_user: dict)
 
     signature_url = f"{route_api}uploads/{inspection.FIRMA}" if inspection.FIRMA and inspection.FIRMA.strip() else ''
     
+    owner_id = (inspection.PROPIETARIO or "").strip()
+    owner_name = inspection.NOMPROPI or ""
+    if owner_id:
+      owner = db.query(Propietarios).filter(Propietarios.ID == owner_id).first()
+      if owner and owner.NOMBRE:
+        owner_name = owner.NOMBRE
+
+    plate = inspection.PLACA or (vehicle.PLACA if vehicle else "")
+    is_unregistered_vehicle = not vehicle_id
+    is_unregistered_owner = not owner_id
+
     inspection_data = {
       "id": inspection.ID,
       "date": inspection.FECHA.strftime('%d-%m-%Y') if inspection.FECHA else None,
       "hour": inspection.HORA.strftime('%H:%M') if inspection.HORA else None,
-      "owner": inspection.PROPIETARIO,
-      "owner_name": inspection.NOMPROPI,
+      "owner": owner_id,
+      "owner_name": owner_name,
       "inspection_type": inspection.TIPO_INSPEC + ' - ' + inspection_type.NOMBRE if inspection_type else "",
-      "vehicle_id": inspection.ID_VEHICULO,
-      "plate": vehicle.PLACA,
+      "vehicle_id": vehicle_id,
+      "plate": plate,
       "vehicle_status": vehicle_status,
       "gps_brand_id": inspection.ID_MARCA.strip() if inspection.ID_MARCA else "",
       "gps_brand": inspection.NOMMARCA.strip() if inspection.NOMMARCA else (brand.NOMBRE.strip() if brand else ""),
@@ -475,6 +495,8 @@ async def inspection_report(inspection_id: int, db: Session, current_user: dict)
       "inspection_user": inspection.NOMUSUARIO if inspection.NOMUSUARIO else "",
       "photos": photos if photos else [],
       "signature": signature_url if signature_url else "",
+      "is_unregistered_vehicle": is_unregistered_vehicle,
+      "is_unregistered_owner": is_unregistered_owner,
     }
 
     panama_timezone = pytz.timezone('America/Panama')
@@ -520,7 +542,7 @@ async def inspection_report(inspection_id: int, db: Session, current_user: dict)
 
       date_str = now_in_panama.strftime("%Y%m%d")
       short_uuid = uuid.uuid4().hex[:8]
-      pdf_filename = f"{vehicle.PLACA}_{date_str}_{short_uuid}.pdf"
+      pdf_filename = f"{plate}_{date_str}_{short_uuid}.pdf"
       temp_dir = os.path.join(upload_directory, 'temp')
       os.makedirs(temp_dir, exist_ok=True)
       pdf_path = os.path.join(temp_dir, pdf_filename)
