@@ -1,10 +1,17 @@
 import { Component, computed, signal, inject, OnInit, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialog } from '@angular/material/dialog';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Vehicle } from '../../interfaces/vehicles.interface';
+import { Owner } from '../../interfaces/owners.interface';
 import { ApiService } from '../../../../core/services/api.service';
 import { SnackbarService } from '../../../../core/services/snackbar.service';
-import { finalize } from 'rxjs';
+import { finalize, Observable, combineLatest, map, startWith } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
+import {
+  ConfirmDialogComponent,
+  ConfirmDialogData,
+} from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { MatOptionSelectionChange } from '@angular/material/core';
 
 @Component({
   selector: 'app-dialog-new-inspection',
@@ -15,16 +22,29 @@ import { finalize } from 'rxjs';
 export class DialogNewInspectionComponent implements OnInit {
   private apiService = inject(ApiService);
   private snackbarService = inject(SnackbarService);
+  private dialog = inject(MatDialog);
 
   // Lista de vehículos
   vehicles = signal<Vehicle[]>([]);
   isLoadingVehicles = signal<boolean>(true);
 
-  // Estado de búsqueda
+  // Estado de búsqueda de vehículos
   searchQuery = signal<string>('');
 
   // Vehículo seleccionado (null si no hay selección)
   selectedVehicle = signal<Vehicle | null>(null);
+
+  // Vehículo no registrado
+  isUnregisteredVehicle = signal<boolean>(false);
+  unregisteredPlate = signal<string>('');
+
+  // Cliente / Propietarios
+  owners = signal<Owner[]>([]);
+  private owners$ = toObservable(this.owners);
+  selectedOwner = signal<Owner | null>(null);
+  isUnregisteredOwner = signal<boolean>(false);
+  unregisteredOwnerName = signal<string>('');
+  ownerSearchControl = new FormControl<string>('');
 
   // CONTROL DEL WIZARD (Pasos)
   currentStep = signal<number>(1);
@@ -55,18 +75,14 @@ export class DialogNewInspectionComponent implements OnInit {
   isEditing = signal<boolean>(false);
   dataSaved = signal<boolean>(false);
 
-  // ... (rest of signals/computed unchanged)
-
-  // COMPUTED: Filtrado Local Ultra-Rápido con Protección de DOM
+  // COMPUTED: Filtrado Local Ultra-Rápido de Vehículos
   filteredVehicles = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
 
-    // 1. ESTADO INICIAL: Si no hay búsqueda, mostramos los primeros 10
     if (!query) {
       return this.vehicles().slice(0, 10);
     }
 
-    // 2. BÚSQUEDA: Filtramos todo el array en memoria
     const results = this.vehicles().filter(
       (v) =>
         (v.plate || '').toLowerCase().includes(query) ||
@@ -75,14 +91,31 @@ export class DialogNewInspectionComponent implements OnInit {
         (v.owner_name || '').toLowerCase().includes(query),
     );
 
-    // 3. PROTECCIÓN DEL HTML: Sin importar cuántos coincidan, solo renderizamos 10
     return results.slice(0, 10);
   });
+
+  // Observable para filtrado en tiempo real de clientes con FormControl (800 clientes)
+  filteredOwners$: Observable<Owner[]> = combineLatest([
+    this.owners$,
+    this.ownerSearchControl.valueChanges.pipe(startWith('')),
+  ]).pipe(
+    map(([owners, filterValue]) => {
+      const filterStr = (filterValue || '').toLowerCase().trim();
+      if (!filterStr) {
+        return owners;
+      }
+      return owners.filter(
+        (owner) =>
+          (owner.name || '').toLowerCase().includes(filterStr) ||
+          String(owner.id).includes(filterStr),
+      );
+    }),
+  );
 
   // Computed: Array de detalles del vehículo seleccionado para el Grid
   selectedVehicleDetails = computed(() => {
     const vehicle = this.selectedVehicle();
-    if (!vehicle) return [];
+    if (!vehicle || this.isUnregisteredVehicle()) return [];
 
     const formatValue = (val: any) => {
       if (val === null || val === undefined || String(val).trim() === '') {
@@ -108,7 +141,6 @@ export class DialogNewInspectionComponent implements OnInit {
       }
     };
 
-    // Mapeamos los datos para iterar fácilmente en el HTML
     return [
       { label: 'Placa', value: formatValue(vehicle.plate), icon: 'directions_car' },
       { label: 'Cliente', value: formatValue(vehicle.owner_name), icon: 'person' },
@@ -147,6 +179,18 @@ export class DialogNewInspectionComponent implements OnInit {
     }
     this.loadInspectionTypes();
     this.loadGpsBrands();
+    this.loadOwners();
+  }
+
+  loadOwners() {
+    this.apiService.get<Owner[]>('/owners').subscribe({
+      next: (data) => {
+        this.owners.set(data || []);
+      },
+      error: (error) => {
+        console.error('Error loading owners:', error);
+      },
+    });
   }
 
   loadInspectionDetails(id: number) {
@@ -154,20 +198,45 @@ export class DialogNewInspectionComponent implements OnInit {
     this.apiService.get<any>(`/inspections/details/${id}`).subscribe({
       next: (res) => {
         if (res) {
-          // Mapeamos los datos de la inspección al formato del vehículo y formulario
+          const isUnregistered = !res.vehicle_id || res.vehicle_id.trim() === '';
+          this.isUnregisteredVehicle.set(isUnregistered);
+          if (isUnregistered) {
+            this.unregisteredPlate.set(res.plate);
+          }
+
           const mockVehicle: Vehicle = {
-            id: res.vehicle_id,
+            id: res.vehicle_id || '',
             plate: res.plate,
             owner_name: res.owner_name,
             owner_id: res.owner,
-            brand: 'Cargando...', // Estos se actualizarán con selectVehicle
+            brand: isUnregistered ? 'N/A' : 'Cargando...',
             model: '',
+            is_unregistered: isUnregistered,
           };
 
-          this.selectVehicle(mockVehicle);
-          this.selectedInspectionType.set(
-            res.inspection_type.split(' - ')[1] || res.inspection_type,
-          );
+          if (isUnregistered) {
+            this.selectedVehicle.set(mockVehicle);
+            this.selectedInspectionType.set(
+              res.inspection_type
+                ? res.inspection_type.split(' - ')[1] || res.inspection_type
+                : 'Revision General',
+            );
+            if (res.owner_name) {
+              this.ownerSearchControl.setValue(res.owner_name);
+              if (res.owner) {
+                this.selectedOwner.set({ id: Number(res.owner), name: res.owner_name });
+                this.isUnregisteredOwner.set(false);
+              } else {
+                this.isUnregisteredOwner.set(true);
+                this.unregisteredOwnerName.set(res.owner_name);
+              }
+            }
+          } else {
+            this.selectVehicle(mockVehicle);
+            this.selectedInspectionType.set(
+              res.inspection_type.split(' - ')[1] || res.inspection_type,
+            );
+          }
 
           this.inspectionForm.patchValue({
             gps_brand_id: res.gps_brand_id || '',
@@ -179,8 +248,6 @@ export class DialogNewInspectionComponent implements OnInit {
             notes: res.notes,
           });
 
-          // En modo edición, mostramos el Paso 1 para permitir cambiar el tipo de inspección
-          // pero manteniendo el vehículo bloqueado.
           this.currentStep.set(1);
           this.isLoadingVehicles.set(false);
         }
@@ -259,6 +326,8 @@ export class DialogNewInspectionComponent implements OnInit {
   }
 
   selectVehicle(vehicle: Vehicle) {
+    this.isUnregisteredVehicle.set(false);
+    this.unregisteredPlate.set('');
     this.selectedVehicle.set(vehicle);
 
     if (!this.isEditing()) {
@@ -292,13 +361,111 @@ export class DialogNewInspectionComponent implements OnInit {
       },
     });
 
-    // Opcional: Limpiar búsqueda al seleccionar
     this.searchQuery.set('');
+  }
+
+  selectUnregisteredVehicle(plate: string) {
+    const cleanPlate = plate.trim().toUpperCase();
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      panelClass: 'custom-dialog-container',
+      data: {
+        title: 'Vehículo no registrado',
+        content: `¿Está seguro que desea crear la inspección para el vehículo con placa "${cleanPlate}" que no está registrado en el sistema?`,
+        confirmText: 'Sí, continuar',
+        cancelText: 'Cancelar',
+        confirmColor: 'primary',
+        iconName: 'directions_car',
+        iconColor: 'text-blue-600',
+        customButtonClass: 'bg-blue-600! text-white! rounded-lg h-10 px-5 font-semibold shadow-sm',
+      } as ConfirmDialogData,
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.isUnregisteredVehicle.set(true);
+        this.unregisteredPlate.set(cleanPlate);
+
+        // Auto-seleccionar tipo por defecto (id 01)
+        const defaultType = this.inspectionTypes().find(
+          (t) => String(t.id).padStart(2, '0') === '01' || t.id === 1,
+        );
+        if (defaultType) {
+          this.selectedInspectionType.set(defaultType.name);
+        } else {
+          this.selectedInspectionType.set('Revision General');
+        }
+
+        const mockVehicle: Vehicle = {
+          id: '',
+          plate: cleanPlate,
+          brand: 'N/A',
+          model: 'N/A',
+          is_unregistered: true,
+        };
+        this.selectedVehicle.set(mockVehicle);
+        this.searchQuery.set('');
+      }
+    });
+  }
+
+  onOwnerSelected(event: MatOptionSelectionChange, owner: Owner) {
+    if (event.isUserInput) {
+      this.selectedOwner.set(owner);
+      this.isUnregisteredOwner.set(false);
+      this.unregisteredOwnerName.set('');
+      this.ownerSearchControl.setValue(owner.name);
+    }
+  }
+
+  onUnregisteredOwnerSelected(event: MatOptionSelectionChange, ownerName: string) {
+    if (event.isUserInput) {
+      const cleanName = ownerName.trim();
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: '450px',
+        panelClass: 'custom-dialog-container',
+        data: {
+          title: 'Cliente no registrado',
+          content: `¿Está seguro que desea asociar el cliente "${cleanName}" que no está registrado en el sistema?`,
+          confirmText: 'Sí, continuar',
+          cancelText: 'Cancelar',
+          confirmColor: 'primary',
+          iconName: 'person_add',
+          iconColor: 'text-blue-600',
+          customButtonClass:
+            'bg-blue-600! text-white! rounded-lg h-10 px-5 font-semibold shadow-sm',
+        } as ConfirmDialogData,
+      });
+
+      dialogRef.afterClosed().subscribe((confirmed) => {
+        if (confirmed) {
+          this.selectedOwner.set(null);
+          this.isUnregisteredOwner.set(true);
+          this.unregisteredOwnerName.set(cleanName);
+          this.ownerSearchControl.setValue(cleanName, { emitEvent: false });
+        } else {
+          this.clearOwnerSelection();
+        }
+      });
+    }
+  }
+
+  clearOwnerSelection() {
+    this.selectedOwner.set(null);
+    this.isUnregisteredOwner.set(false);
+    this.unregisteredOwnerName.set('');
+    this.ownerSearchControl.setValue('');
   }
 
   changeVehicle() {
     this.selectedVehicle.set(null);
-    this.selectedInspectionType.set(null); // Importante: Limpiamos el tipo si cambia de carro
+    this.selectedInspectionType.set(null);
+    this.isUnregisteredVehicle.set(false);
+    this.unregisteredPlate.set('');
+    this.selectedOwner.set(null);
+    this.isUnregisteredOwner.set(false);
+    this.unregisteredOwnerName.set('');
+    this.ownerSearchControl.setValue('');
     this.inspectionId.set(null);
     this.inspectionForm.reset();
     this.currentStep.set(1);
@@ -309,11 +476,18 @@ export class DialogNewInspectionComponent implements OnInit {
   }
 
   nextStep() {
-    // Verificamos que ambas cosas estén seleccionadas
-    if (this.selectedVehicle() && this.selectedInspectionType()) {
-      console.log('Procediendo con vehículo:', this.selectedVehicle()?.plate);
-      console.log('Tipo de Inspección:', this.selectedInspectionType());
+    if (this.isUnregisteredVehicle()) {
+      if (!this.selectedInspectionType()) {
+        const defaultType = this.inspectionTypes().find(
+          (t) => String(t.id).padStart(2, '0') === '01' || t.id === 1,
+        );
+        this.selectedInspectionType.set(defaultType ? defaultType.name : 'Revision General');
+      }
+      this.currentStep.set(2);
+      return;
+    }
 
+    if (this.selectedVehicle() && this.selectedInspectionType()) {
       if (!this.isEditing()) {
         const vehicle = this.selectedVehicle()!;
         const currentVals = this.inspectionForm.value;
@@ -334,24 +508,54 @@ export class DialogNewInspectionComponent implements OnInit {
     this.currentStep.set(1);
   }
 
+  isFormValid(): boolean {
+    if (this.inspectionForm.invalid) {
+      return false;
+    }
+    if (this.isUnregisteredVehicle()) {
+      const ownerVal = (this.ownerSearchControl.value || '').trim();
+      if (!ownerVal) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   finishInspection() {
-    if (this.inspectionForm.invalid || !this.selectedVehicle() || !this.selectedInspectionType()) {
+    if (!this.isFormValid() || !this.selectedVehicle()) {
+      if (this.isUnregisteredVehicle() && !(this.ownerSearchControl.value || '').trim()) {
+        this.snackbarService.openSnackBar('Debe ingresar o seleccionar un cliente para continuar.');
+      }
       return;
     }
 
-    // Cambiamos al Paso 3 (Pantalla de Carga)
     this.currentStep.set(3);
 
     const vehicle = this.selectedVehicle()!;
     const formValue = this.inspectionForm.value;
 
-    const matchedType = this.inspectionTypes().find(
-      (t) => t.name === this.selectedInspectionType(),
-    );
-    const inspection_type_id = matchedType ? String(matchedType.id) : '';
+    let inspection_type_id = '01';
+    if (!this.isUnregisteredVehicle()) {
+      const matchedType = this.inspectionTypes().find(
+        (t) => t.name === this.selectedInspectionType(),
+      );
+      inspection_type_id = matchedType ? String(matchedType.id).padStart(2, '0') : '01';
+    }
+
+    const currentOwnerName = (this.ownerSearchControl.value || '').trim();
+    const ownerId = this.isUnregisteredOwner()
+      ? ''
+      : this.selectedOwner()
+        ? String(this.selectedOwner()!.id)
+        : '';
+    const ownerName = this.isUnregisteredOwner()
+      ? this.unregisteredOwnerName()
+      : this.selectedOwner()
+        ? this.selectedOwner()!.name
+        : currentOwnerName;
 
     const payload = {
-      vehicle_id: String(vehicle.id),
+      vehicle_id: this.isUnregisteredVehicle() ? '' : String(vehicle.id),
       inspection_type_id: inspection_type_id,
       gps_brand_id: formValue.gps_brand_id || '',
       gps_serial: formValue.gps_serial || '',
@@ -360,6 +564,13 @@ export class DialogNewInspectionComponent implements OnInit {
       installation_way: formValue.installation_way || '',
       description: formValue.description || '',
       notes: formValue.notes || '',
+      plate: this.isUnregisteredVehicle() ? this.unregisteredPlate() : vehicle.plate,
+      owner_name: this.isUnregisteredVehicle() ? ownerName : vehicle.owner_name || '',
+      owner_id: this.isUnregisteredVehicle() ? ownerId : vehicle.owner_id || '',
+      is_unregistered_vehicle: this.isUnregisteredVehicle(),
+      is_unregistered_owner: this.isUnregisteredVehicle()
+        ? !this.selectedOwner() || this.isUnregisteredOwner()
+        : false,
     };
 
     if (this.isEditing()) {
@@ -369,7 +580,6 @@ export class DialogNewInspectionComponent implements OnInit {
           next: (res) => {
             this.snackbarService.openSnackBar('Se ha actualizado la inspección correctamente.');
             this.dataSaved.set(true);
-            // Después de editar, según el requerimiento, podríamos ir a fotos/firma o cerrar.
             this.currentStep.set(4);
           },
           error: (error) => {
@@ -385,29 +595,25 @@ export class DialogNewInspectionComponent implements OnInit {
             this.inspectionId.set(res.id);
             this.dataSaved.set(true);
             this.snackbarService.openSnackBar('Se ha creado la inspección correctamente.');
-            this.currentStep.set(4); // Avanzamos al Paso 4 (Cámara)
+            this.currentStep.set(4);
           }
         },
         error: (error) => {
           console.error('Error creating inspection:', error);
           this.snackbarService.openSnackBar('Ha ocurrido un error al crear la inspección.');
-          // Si hay un error, volvemos al Paso 2 para permitir correcciones/reintentos
           this.currentStep.set(2);
         },
       });
     }
   }
 
-  // Se llama cuando la cámara termina de capturar
   completeWizard(photos: string[]) {
     if (!photos || photos.length === 0 || !this.inspectionId()) {
       return;
     }
 
-    // Cambiamos al Paso 5 (Pantalla de Carga para la firma)
     this.currentStep.set(5);
 
-    // Convertimos las fotos Base64 en objetos File y las añadimos a FormData
     const formData = new FormData();
     photos.forEach((photo, index) => {
       try {
@@ -418,7 +624,6 @@ export class DialogNewInspectionComponent implements OnInit {
       }
     });
 
-    // Llamamos al endpoint de cargar imágenes
     const id = this.inspectionId()!;
     this.apiService
       .postFormData<{ message: string }>(`/inspections/upload-images/${id}`, formData)
@@ -428,19 +633,16 @@ export class DialogNewInspectionComponent implements OnInit {
           this.snackbarService.openSnackBar(
             'Se han subido las fotos correctamente. ¡Inspección finalizada!',
           );
-          // Avanzamos al Paso 6 (Firma)
           this.currentStep.set(6);
         },
         error: (error) => {
           console.error('Error uploading images:', error);
           this.snackbarService.openSnackBar('Ha ocurrido un error al subir las fotos.');
-          // Si hay error, regresamos al Paso 4 (Cámara) para que intente de nuevo
           this.currentStep.set(4);
         },
       });
   }
 
-  // Helper para convertir Base64 Data URL en un objeto File
   private dataURLtoFile(dataurl: string, filename: string): File {
     const arr = dataurl.split(',');
     const mime = arr[0].match(/:(.*?);/)![1];
@@ -469,7 +671,7 @@ export class DialogNewInspectionComponent implements OnInit {
         next: (res) => {
           console.log('Signature uploaded successfully:', res.message);
           this.snackbarService.openSnackBar('Se ha subido la firma correctamente.');
-          this.dialogRef.close(true); // Cerramos el modal grande definitivamente con true (se guardó algo)
+          this.dialogRef.close(true);
         },
         error: (error) => {
           console.error('Error uploading signature:', error);

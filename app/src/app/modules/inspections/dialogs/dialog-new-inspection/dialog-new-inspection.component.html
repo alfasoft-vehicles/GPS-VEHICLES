@@ -115,14 +115,46 @@
                       >
                       <span class="truncate">{{ vehicle.owner_id || vehicle.owner_name }}</span>
                     </div>
-                    <!-- <div class="text-sm text-slate-500 flex items-center gap-1.5 transition-colors group-hover:text-slate-700">
-                      <mat-icon class="text-slate-400 scale-75 transition-colors group-hover:text-primary-500">confirmation_number</mat-icon>
-                      Cupo: {{ vehicle.quota }}
-                    </div> -->
                   </div>
 
                   <mat-icon
                     class="text-slate-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all"
+                    >chevron_right</mat-icon
+                  >
+                </div>
+              }
+
+              <!-- Opción extra: Vehículo no creado (cuando hay búsqueda) -->
+              @if (searchQuery() && searchQuery().trim().length >= 2) {
+                <div
+                  (click)="selectUnregisteredVehicle(searchQuery())"
+                  class="bg-blue-50/80 p-5 rounded-2xl border-2 border-blue-200 shadow-sm flex items-center gap-5 cursor-pointer transition-all duration-300 hover:border-blue-400 hover:bg-blue-100/60 hover:shadow-md group"
+                >
+                  <div
+                    class="bg-blue-600 text-white w-16 h-16 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:rounded-2xl shadow-sm shadow-blue-500/20"
+                  >
+                    <mat-icon class="!w-10 !h-10 !leading-10 text-[40px] text-center"
+                      >add_circle</mat-icon
+                    >
+                  </div>
+
+                  <div class="flex-1 flex flex-col gap-1.5 overflow-hidden py-0.5">
+                    <div class="flex items-baseline flex-wrap gap-x-2">
+                      <span class="text-lg font-bold text-blue-900 truncate">
+                        {{ searchQuery().toUpperCase() }}
+                      </span>
+                    </div>
+                    <div class="flex items-center gap-2 mt-0.5">
+                      <span
+                        class="bg-blue-800 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full inline-block"
+                      >
+                        Vehículo no creado en el sistema
+                      </span>
+                    </div>
+                  </div>
+
+                  <mat-icon
+                    class="text-blue-400 group-hover:text-blue-700 group-hover:translate-x-1 transition-all"
                     >chevron_right</mat-icon
                   >
                 </div>
@@ -139,98 +171,203 @@
                 </span>
               </div>
             } @else {
+              <!-- Si no hay coincidencias de vehículos creados, mostramos opción de vehículo no creado -->
+              @if (searchQuery() && searchQuery().trim().length >= 2) {
+                <div
+                  (click)="selectUnregisteredVehicle(searchQuery())"
+                  class="bg-blue-50/90 p-5 rounded-2xl border-2 border-blue-200 shadow-sm flex items-center gap-5 cursor-pointer transition-all duration-300 hover:border-blue-400 hover:bg-blue-100/70 hover:shadow-md group mb-4"
+                >
+                  <div
+                    class="bg-blue-600 text-white w-16 h-16 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:rounded-2xl shadow-sm shadow-blue-500/20"
+                  >
+                    <mat-icon class="!w-10 !h-10 !leading-10 text-[40px] text-center"
+                      >add_circle</mat-icon
+                    >
+                  </div>
+
+                  <div class="flex-1 flex flex-col gap-1.5 overflow-hidden py-0.5">
+                    <div class="flex items-baseline flex-wrap gap-x-2">
+                      <span class="text-lg font-bold text-blue-900 truncate">
+                        {{ searchQuery().toUpperCase() }}
+                      </span>
+                    </div>
+                    <div class="flex items-center gap-2 mt-0.5">
+                      <span
+                        class="bg-blue-800 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full inline-block"
+                      >
+                        Vehículo no creado en el sistema
+                      </span>
+                    </div>
+                  </div>
+
+                  <mat-icon
+                    class="text-blue-400 group-hover:text-blue-700 group-hover:translate-x-1 transition-all"
+                    >chevron_right</mat-icon
+                  >
+                </div>
+              }
+
               <div
                 class="text-center py-12 bg-white rounded-2xl border border-slate-100 border-dashed"
               >
                 <mat-icon class="!w-16 !h-10 text-[64px] text-slate-300">search_off</mat-icon>
                 <h3 class="text-lg font-bold text-slate-700 mb-1">No hay resultados</h3>
                 <p class="text-slate-500 text-sm">
-                  No se encontraron vehículos que coincidan con "{{ searchQuery() }}"
+                  No se encontraron vehículos registrados que coincidan con "{{ searchQuery() }}"
                 </p>
               </div>
             }
           </div>
         </div>
       } @else {
+        <!-- VEHICULO SELECCIONADO -->
         <div class="px-6 pb-6 pt-6 flex flex-col h-full gap-5 overflow-y-auto md:overflow-hidden">
-          <div
-            class="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm flex flex-col max-[390px]:items-start max-[390px]:gap-4 min-[391px]:flex-row min-[391px]:items-center min-[391px]:justify-between shrink-0"
-          >
-            <div class="flex items-center gap-4">
-              <mat-icon class="!w-14 !h-14 !leading-[56px] text-[56px] text-center text-emerald-500"
-                >check_circle</mat-icon
+          @if (isUnregisteredVehicle()) {
+            <!-- Banner Azul para vehículo no registrado -->
+            <div
+              class="bg-blue-50/70 p-6 rounded-2xl border border-blue-200 shadow-sm flex flex-col max-[390px]:items-start max-[390px]:gap-4 min-[391px]:flex-row min-[391px]:items-center min-[391px]:justify-between shrink-0"
+            >
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm shadow-blue-500/20"
+                >
+                  <mat-icon class="!w-8 !h-8 text-[32px] !leading-8">directions_car</mat-icon>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2.5 flex-wrap">
+                    <h4 class="text-xl font-bold text-blue-950">Vehículo No Registrado</h4>
+                    <span
+                      class="bg-blue-800 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full"
+                    >
+                      No creado
+                    </span>
+                  </div>
+                  <p class="text-blue-700 text-sm mt-0.5">
+                    Placa:
+                    <span class="font-bold text-blue-950">{{ selectedVehicle()?.plate }}</span>
+                  </p>
+                </div>
+              </div>
+              <button
+                *ngIf="!isEditing()"
+                mat-stroked-button
+                class="rounded-lg h-9 border-blue-300! text-blue-800! bg-white shrink-0 max-[390px]:w-full hover:bg-blue-50"
+                (click)="changeVehicle()"
               >
-              <div>
-                <h4 class="text-xl font-bold text-slate-800">Vehículo Confirmado</h4>
+                <mat-icon class="scale-90 mr-1 text-blue-600">change_circle</mat-icon>
+                <span>Cambiar</span>
+              </button>
+            </div>
+
+            <!-- Explicación Informativa -->
+            <div
+              class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex-1 flex flex-col items-center justify-center text-center"
+            >
+              <div
+                class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mb-4"
+              >
+                <mat-icon class="!w-8 !h-8 text-[32px] !leading-8">assignment_turned_in</mat-icon>
+              </div>
+              <h4 class="text-lg font-bold text-slate-800 mb-1">Inspección con tipo por defecto</h4>
+              <p class="text-slate-500 text-sm max-w-md leading-relaxed mb-4">
+                Dado que el vehículo no está registrado, se asignará automáticamente el tipo de
+                inspección
+                <span class="font-bold text-slate-700"
+                  >"{{ selectedInspectionType() || 'Revisión General' }}"</span
+                >. Podrás completar los datos y asociar o registrar el cliente en el siguiente paso.
+              </p>
+              <div
+                class="flex items-center gap-2 text-xs font-semibold text-slate-400 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100"
+              >
+                <mat-icon class="scale-75 text-slate-400">info</mat-icon>
+                <span>Presiona "Siguiente" para continuar</span>
+              </div>
+            </div>
+          } @else {
+            <!-- Banner Verde para vehículo registrado existente -->
+            <div
+              class="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm flex flex-col max-[390px]:items-start max-[390px]:gap-4 min-[391px]:flex-row min-[391px]:items-center min-[391px]:justify-between shrink-0"
+            >
+              <div class="flex items-center gap-4">
+                <mat-icon
+                  class="!w-14 !h-14 !leading-[56px] text-[56px] text-center text-emerald-500"
+                  >check_circle</mat-icon
+                >
+                <div>
+                  <h4 class="text-xl font-bold text-slate-800">Vehículo Confirmado</h4>
+                  <p class="text-slate-500 text-sm">
+                    Placa:
+                    <span class="font-bold text-slate-700">{{ selectedVehicle()?.plate }}</span>
+                  </p>
+                </div>
+              </div>
+              <button
+                *ngIf="!isEditing()"
+                mat-stroked-button
+                color="primary"
+                class="rounded-lg h-9 border-primary-200! shrink-0 max-[390px]:w-full"
+                (click)="changeVehicle()"
+              >
+                <mat-icon class="scale-90 mr-1">change_circle</mat-icon>
+                <span>Cambiar</span>
+              </button>
+            </div>
+
+            <div
+              class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm shrink-0 flex flex-col md:flex-row md:items-center gap-4"
+            >
+              <div class="flex-1">
+                <h4 class="text-base font-bold text-slate-800">Tipo de Inspección</h4>
                 <p class="text-slate-500 text-sm">
-                  Placa:
-                  <span class="font-bold text-slate-700">{{ selectedVehicle()?.plate }}</span>
+                  Requisito obligatorio para comenzar la revisión
                 </p>
               </div>
-            </div>
-            <button
-              *ngIf="!isEditing()"
-              mat-stroked-button
-              color="primary"
-              class="rounded-lg h-9 border-primary-200! shrink-0 max-[390px]:w-full"
-              (click)="changeVehicle()"
-            >
-              <mat-icon class="scale-90 mr-1">change_circle</mat-icon>
-              <span>Cambiar</span>
-            </button>
-          </div>
-
-          <div
-            class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm shrink-0 flex flex-col md:flex-row md:items-center gap-4"
-          >
-            <div class="flex-1">
-              <h4 class="text-base font-bold text-slate-800">Tipo de Inspección</h4>
-              <p class="text-slate-500 text-sm">Requisito obligatorio para comenzar la revisión</p>
-            </div>
-            <div class="w-full md:w-80 shrink-0">
-              <mat-form-field
-                appearance="fill"
-                subscriptSizing="dynamic"
-                class="w-full compact-form-field"
-              >
-                <mat-label>Selecciona un tipo</mat-label>
-                <mat-select
-                  [value]="selectedInspectionType()"
-                  (selectionChange)="selectedInspectionType.set($event.value)"
+              <div class="w-full md:w-80 shrink-0">
+                <mat-form-field
+                  appearance="fill"
+                  subscriptSizing="dynamic"
+                  class="w-full compact-form-field"
                 >
-                  @for (type of inspectionTypes(); track type.id) {
-                    <mat-option [value]="type.name">{{ type.name }}</mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
-            </div>
-          </div>
-
-          <div
-            class="bg-white rounded-2xl border border-slate-100 p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5 shadow-sm pr-2 shrink-0 md:shrink md:flex-1 md:overflow-y-auto"
-          >
-            @for (detail of selectedVehicleDetails(); track detail.label) {
-              <div class="flex items-start gap-3.5">
-                <div
-                  class="bg-slate-100 text-slate-500 w-10 h-10 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                >
-                  <mat-icon class="scale-90">{{ detail.icon }}</mat-icon>
-                </div>
-                <div class="flex flex-col">
-                  <span class="text-xs font-semibold text-slate-400 tracking-wide uppercase">{{
-                    detail.label
-                  }}</span>
-                  <span class="text-base font-semibold text-slate-800 leading-snug">{{
-                    detail.value
-                  }}</span>
-                </div>
+                  <mat-label>Selecciona un tipo</mat-label>
+                  <mat-select
+                    [value]="selectedInspectionType()"
+                    (selectionChange)="selectedInspectionType.set($event.value)"
+                  >
+                    @for (type of inspectionTypes(); track type.id) {
+                      <mat-option [value]="type.name">{{ type.name }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
               </div>
-            }
-          </div>
+            </div>
+
+            <div
+              class="bg-white rounded-2xl border border-slate-100 p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5 shadow-sm pr-2 shrink-0 md:shrink md:flex-1 md:overflow-y-auto"
+            >
+              @for (detail of selectedVehicleDetails(); track detail.label) {
+                <div class="flex items-start gap-3.5">
+                  <div
+                    class="bg-slate-100 text-slate-500 w-10 h-10 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                  >
+                    <mat-icon class="scale-90">{{ detail.icon }}</mat-icon>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-xs font-semibold text-slate-400 tracking-wide uppercase">{{
+                      detail.label
+                    }}</span>
+                    <span class="text-base font-semibold text-slate-800 leading-snug">{{
+                      detail.value
+                    }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
         </div>
       }
     } @else if (currentStep() === 2) {
       <div class="flex flex-col md:flex-row h-full p-6 gap-6 overflow-y-auto md:overflow-hidden">
+        <!-- PANEL IZQUIERDO: RESUMEN -->
         <div
           class="w-full md:w-1/3 flex flex-col bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden shrink-0 md:shrink md:h-full h-auto"
         >
@@ -246,22 +383,46 @@
                 >Tipo de Inspección</span
               >
               <span class="block text-sm font-semibold text-primary-900">{{
-                selectedInspectionType()
+                selectedInspectionType() || 'Revision General'
               }}</span>
             </div>
 
-            @for (detail of selectedVehicleDetails(); track detail.label) {
-              <div class="border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+            @if (isUnregisteredVehicle()) {
+              <!-- Resumen especial para vehículo no registrado -->
+              <div class="border-b border-slate-100 pb-3">
                 <span
                   class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5"
-                  >{{ detail.label }}</span
+                  >Placa</span
                 >
-                <span class="block text-sm font-medium text-slate-700">{{ detail.value }}</span>
+                <span class="block text-sm font-bold text-slate-800">{{
+                  selectedVehicle()?.plate
+                }}</span>
               </div>
+
+              <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                <span class="block text-xs font-bold text-amber-700 uppercase tracking-wide mb-1"
+                  >Información del Vehículo</span
+                >
+                <span class="block text-xs font-medium text-amber-800 leading-relaxed">
+                  No hay información adicional registrada. El vehículo no está creado en el
+                  inventario.
+                </span>
+              </div>
+            } @else {
+              @for (detail of selectedVehicleDetails(); track detail.label) {
+                <div class="border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                  <span
+                    class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5"
+                    >{{ detail.label }}</span
+                  >
+                  <span class="block text-sm font-medium text-slate-700">{{ detail.value }}</span>
+                </div>
+              }
             }
           </div>
         </div>
 
+        <!-- PANEL DERECHO: FORMULARIO -->
         <div
           [formGroup]="inspectionForm"
           class="w-full md:w-2/3 flex flex-col bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden shrink-0 md:shrink md:h-full h-auto"
@@ -274,6 +435,72 @@
 
           <div class="p-6 md:overflow-y-auto overflow-visible flex-1">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <!-- AUTOCOMPLETE DE CLIENTE (SOLO VISIBLE CUANDO EL VEHÍCULO NO ESTÁ REGISTRADO) -->
+              @if (isUnregisteredVehicle()) {
+                <mat-form-field
+                  appearance="fill"
+                  subscriptSizing="dynamic"
+                  class="w-full compact-form-field sm:col-span-2"
+                >
+                  <mat-label>Cliente*</mat-label>
+                  <input
+                    matInput
+                    placeholder="Buscar o escribir nombre del cliente..."
+                    [formControl]="ownerSearchControl"
+                    [matAutocomplete]="autoOwner"
+                  />
+                  <mat-autocomplete #autoOwner="matAutocomplete">
+                    @for (owner of filteredOwners$ | async; track owner.id) {
+                      <mat-option
+                        [value]="owner.name"
+                        (onSelectionChange)="onOwnerSelected($event, owner)"
+                      >
+                        <div class="flex items-center justify-between w-full">
+                          <span>{{ owner.name }}</span>
+                          <span class="text-xs text-slate-400 ml-2">#{{ owner.id }}</span>
+                        </div>
+                      </mat-option>
+                    }
+
+                    <!-- Opción diferenciada para Cliente no creado -->
+                    @if (ownerSearchControl.value && ownerSearchControl.value.trim().length >= 2) {
+                      <mat-option
+                        class="!bg-blue-50/90 hover:!bg-blue-100/80 border-t border-blue-100"
+                        [value]="ownerSearchControl.value"
+                        (onSelectionChange)="
+                          onUnregisteredOwnerSelected($event, ownerSearchControl.value!)
+                        "
+                      >
+                        <div class="flex items-center gap-2 w-full py-1">
+                          <mat-icon class="text-blue-600 scale-75 shrink-0">person_add</mat-icon>
+                          <span class="text-blue-900 font-bold truncate">
+                            {{ ownerSearchControl.value }}
+                          </span>
+                          <span
+                            class="bg-blue-800 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full ml-auto shrink-0"
+                          >
+                            Cliente no creado
+                          </span>
+                        </div>
+                      </mat-option>
+                    }
+                  </mat-autocomplete>
+
+                  @if (ownerSearchControl.value) {
+                    <button
+                      matSuffix
+                      mat-icon-button
+                      type="button"
+                      (click)="clearOwnerSelection()"
+                      class="!w-8 !h-8 !p-0 text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      <mat-icon class="scale-75">close</mat-icon>
+                    </button>
+                  }
+                  <mat-icon matSuffix class="text-slate-400 scale-90">person_search</mat-icon>
+                </mat-form-field>
+              }
+
               <mat-form-field
                 appearance="fill"
                 subscriptSizing="dynamic"
@@ -398,7 +625,7 @@
                   matInput
                   formControlName="notes"
                   rows="3"
-                  placeholder="Notas adicionales (obligatorio)..."
+                  placeholder="Notas adicionales (opcional)..."
                 ></textarea>
               </mat-form-field>
             </div>
@@ -481,7 +708,7 @@
           mat-flat-button
           color="primary"
           class="rounded-lg h-10 px-6"
-          [disabled]="!selectedVehicle() || !selectedInspectionType()"
+          [disabled]="!selectedVehicle() || (!selectedInspectionType() && !isUnregisteredVehicle())"
           (click)="nextStep()"
         >
           Siguiente <mat-icon class="ml-1.5 scale-90">arrow_forward</mat-icon>
@@ -491,7 +718,7 @@
           mat-flat-button
           color="primary"
           class="rounded-lg h-10 px-6"
-          [disabled]="inspectionForm.invalid"
+          [disabled]="!isFormValid()"
           (click)="finishInspection()"
         >
           Siguiente <mat-icon class="ml-1.5 scale-90">arrow_forward</mat-icon>
