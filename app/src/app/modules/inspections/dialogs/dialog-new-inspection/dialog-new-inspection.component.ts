@@ -376,8 +376,8 @@ export class DialogNewInspectionComponent implements OnInit {
         cancelText: 'Cancelar',
         confirmColor: 'primary',
         iconName: 'directions_car',
-        iconColor: 'text-blue-600',
-        customButtonClass: 'bg-blue-600! text-white! rounded-lg h-10 px-5 font-semibold shadow-sm',
+        iconColor: 'text-[var(--mat-sys-primary)]',
+        iconBgColor: 'bg-blue-50',
       } as ConfirmDialogData,
     });
 
@@ -431,9 +431,8 @@ export class DialogNewInspectionComponent implements OnInit {
           cancelText: 'Cancelar',
           confirmColor: 'primary',
           iconName: 'person_add',
-          iconColor: 'text-blue-600',
-          customButtonClass:
-            'bg-blue-600! text-white! rounded-lg h-10 px-5 font-semibold shadow-sm',
+          iconColor: 'text-[var(--mat-sys-primary)]',
+          iconBgColor: 'bg-blue-50',
         } as ConfirmDialogData,
       });
 

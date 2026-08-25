@@ -83,12 +83,13 @@
               @for (vehicle of filteredVehicles(); track vehicle.id) {
                 <div
                   (click)="selectVehicle(vehicle)"
-                  class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-5 cursor-pointer transition-all duration-300 hover:border-primary-100 hover:shadow-md group"
+                  class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-5 cursor-pointer transition-all duration-300 hover:bg-blue-50/20 hover:border-blue-100 hover:shadow-md group"
                 >
                   <div
-                    class="vehicle-icon-box bg-primary-50 text-primary-600 w-16 h-16 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:bg-primary-600 group-hover:scale-110 group-hover:rounded-2xl group-hover:shadow-md group-hover:shadow-primary-500/30"
+                    class="vehicle-icon-box bg-blue-50 text-[var(--mat-sys-primary)] w-16 h-16 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:rounded-2xl group-hover:shadow-md group-hover:shadow-blue-500/20"
                   >
-                    <mat-icon class="!w-10 !h-10 !leading-10 text-[40px] text-center"
+                    <mat-icon
+                      class="!w-10 !h-10 !leading-none text-[40px] text-center !flex !items-center !justify-center"
                       >local_taxi</mat-icon
                     >
                   </div>
@@ -131,9 +132,10 @@
                   class="bg-blue-50/80 p-5 rounded-2xl border-2 border-blue-200 shadow-sm flex items-center gap-5 cursor-pointer transition-all duration-300 hover:border-blue-400 hover:bg-blue-100/60 hover:shadow-md group"
                 >
                   <div
-                    class="bg-blue-600 text-white w-16 h-16 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:rounded-2xl shadow-sm shadow-blue-500/20"
+                    class="bg-[var(--mat-sys-primary)] text-white w-16 h-16 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:rounded-2xl shadow-sm shadow-blue-500/20"
                   >
-                    <mat-icon class="!w-10 !h-10 !leading-10 text-[40px] text-center"
+                    <mat-icon
+                      class="!w-10 !h-10 !leading-none text-[40px] text-center !flex !items-center !justify-center"
                       >add_circle</mat-icon
                     >
                   </div>
@@ -178,9 +180,10 @@
                   class="bg-blue-50/90 p-5 rounded-2xl border-2 border-blue-200 shadow-sm flex items-center gap-5 cursor-pointer transition-all duration-300 hover:border-blue-400 hover:bg-blue-100/70 hover:shadow-md group mb-4"
                 >
                   <div
-                    class="bg-blue-600 text-white w-16 h-16 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:rounded-2xl shadow-sm shadow-blue-500/20"
+                    class="bg-[var(--mat-sys-primary)] text-white w-16 h-16 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:rounded-2xl shadow-sm shadow-blue-500/20"
                   >
-                    <mat-icon class="!w-10 !h-10 !leading-10 text-[40px] text-center"
+                    <mat-icon
+                      class="!w-10 !h-10 !leading-none text-[40px] text-center !flex !items-center !justify-center"
                       >add_circle</mat-icon
                     >
                   </div>
@@ -229,9 +232,12 @@
             >
               <div class="flex items-center gap-4">
                 <div
-                  class="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm shadow-blue-500/20"
+                  class="w-14 h-14 rounded-2xl bg-[var(--mat-sys-primary)] text-white flex items-center justify-center shrink-0 shadow-sm shadow-blue-500/20"
                 >
-                  <mat-icon class="!w-8 !h-8 text-[32px] !leading-8">directions_car</mat-icon>
+                  <mat-icon
+                    class="!w-8 !h-8 text-[32px] !leading-none !flex !items-center !justify-center text-center"
+                    >directions_car</mat-icon
+                  >
                 </div>
                 <div>
                   <div class="flex items-center gap-2.5 flex-wrap">
@@ -254,7 +260,9 @@
                 class="rounded-lg h-9 border-blue-300! text-blue-800! bg-white shrink-0 max-[390px]:w-full hover:bg-blue-50"
                 (click)="changeVehicle()"
               >
-                <mat-icon class="scale-90 mr-1 text-blue-600">change_circle</mat-icon>
+                <mat-icon class="scale-90 mr-1 text-[var(--mat-sys-primary)]"
+                  >change_circle</mat-icon
+                >
                 <span>Cambiar</span>
               </button>
             </div>
@@ -266,7 +274,10 @@
               <div
                 class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mb-4"
               >
-                <mat-icon class="!w-8 !h-8 text-[32px] !leading-8">assignment_turned_in</mat-icon>
+                <mat-icon
+                  class="!w-8 !h-8 text-[32px] !leading-none !flex !items-center !justify-center text-center"
+                  >assignment_turned_in</mat-icon
+                >
               </div>
               <h4 class="text-lg font-bold text-slate-800 mb-1">Inspección con tipo por defecto</h4>
               <p class="text-slate-500 text-sm max-w-md leading-relaxed mb-4">
@@ -472,7 +483,9 @@
                         "
                       >
                         <div class="flex items-center gap-2 w-full py-1">
-                          <mat-icon class="text-blue-600 scale-75 shrink-0">person_add</mat-icon>
+                          <mat-icon class="text-[var(--mat-sys-primary)] scale-75 shrink-0"
+                            >person_add</mat-icon
+                          >
                           <span class="text-blue-900 font-bold truncate">
                             {{ ownerSearchControl.value }}
                           </span>

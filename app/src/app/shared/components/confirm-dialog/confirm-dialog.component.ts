@@ -8,7 +8,8 @@ export interface ConfirmDialogData {
   cancelText?: string;
   confirmColor?: string; // e.g. 'primary', 'warn', 'accent'
   iconName?: string;
-  iconColor?: string; // Tailwind class like 'text-blue-500', 'text-amber-500'
+  iconColor?: string; // Tailwind class like 'text-blue-600', 'text-amber-500'
+  iconBgColor?: string; // Tailwind class like 'bg-blue-50', 'bg-amber-50'
   customButtonClass?: string; // Tailwind custom classes for confirm button if needed
 }
 

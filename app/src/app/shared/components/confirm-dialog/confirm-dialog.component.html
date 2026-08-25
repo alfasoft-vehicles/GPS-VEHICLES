@@ -2,10 +2,16 @@
   <div class="flex items-start gap-4">
     @if (data.iconName) {
       <div
-        class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-slate-100"
-        [ngClass]="data.iconColor ? data.iconColor : 'text-primary-600'"
+        class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+        [ngClass]="[
+          data.iconBgColor ? data.iconBgColor : 'bg-blue-50',
+          data.iconColor ? data.iconColor : 'text-[var(--mat-sys-primary)]',
+        ]"
       >
-        <mat-icon class="!w-7 !h-7 text-[28px] !leading-7">{{ data.iconName }}</mat-icon>
+        <mat-icon
+          class="!w-7 !h-7 text-[28px] !leading-none !flex !items-center !justify-center text-center"
+          >{{ data.iconName }}</mat-icon
+        >
       </div>
     }
     <div class="flex-1">
@@ -21,7 +27,7 @@
   <div class="flex items-center justify-end gap-3 mt-3 pt-3 border-t border-slate-100">
     <button
       mat-stroked-button
-      class="rounded-lg h-10 px-5 border-slate-300! text-slate-600!"
+      class="rounded-lg h-10 px-6 border-slate-300! text-slate-600!"
       (click)="onCancel()"
     >
       {{ data.cancelText || 'Cancelar' }}
@@ -29,7 +35,7 @@
     <button
       mat-flat-button
       [color]="data.confirmColor || 'primary'"
-      [class]="data.customButtonClass || 'rounded-lg h-10 px-5 font-semibold'"
+      [class]="data.customButtonClass || 'rounded-lg h-10 px-6'"
       (click)="onConfirm()"
     >
       {{ data.confirmText || 'Aceptar' }}
