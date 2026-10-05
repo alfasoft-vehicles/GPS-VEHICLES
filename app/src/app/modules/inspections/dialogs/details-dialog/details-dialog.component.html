@@ -46,9 +46,9 @@
             class="px-5 py-3.5 border-b border-slate-100 bg-slate-50/80 flex items-center gap-2.5"
           >
             <div
-              class="bg-blue-100 text-blue-600 w-8 h-8 rounded-lg flex items-center justify-center"
+              class="bg-blue-50 text-[var(--mat-sys-primary)] w-8 h-8 rounded-lg flex items-center justify-center"
             >
-              <mat-icon class="scale-75">info</mat-icon>
+              <mat-icon class="scale-75 !flex !items-center !justify-center">info</mat-icon>
             </div>
             <h3 class="font-bold text-slate-800">Información General</h3>
 
@@ -116,6 +116,13 @@
             <div class="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2.5">
               <mat-icon class="text-slate-400">person</mat-icon>
               <h3 class="font-bold text-slate-800">Cliente</h3>
+              @if (isOwnerUnregistered()) {
+                <span
+                  class="ml-auto bg-blue-50 text-[var(--mat-sys-primary)] border border-blue-200 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide"
+                >
+                  No registrado
+                </span>
+              }
             </div>
             <div class="p-5 flex-1 grid grid-cols-2 gap-4">
               <div>
@@ -173,6 +180,13 @@
           <div class="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2.5">
             <mat-icon class="text-slate-400">directions_car</mat-icon>
             <h3 class="font-bold text-slate-800">Datos del Vehículo</h3>
+            @if (isVehicleUnregistered()) {
+              <span
+                class="ml-auto bg-blue-50 text-[var(--mat-sys-primary)] border border-blue-200 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide"
+              >
+                No registrado
+              </span>
+            }
           </div>
           <div class="p-5 grid grid-cols-2 sm:grid-cols-3 gap-y-5 gap-x-6">
             <div>
@@ -300,24 +314,25 @@
           <!-- Tarjeta de Fotos -->
           @if (data.photos && data.photos.length > 0) {
             <div
-              class="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4"
+              class="bg-blue-50/70 border border-blue-200 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4"
             >
-              <div class="flex items-center gap-3 text-indigo-900">
+              <div class="flex items-center gap-3 text-blue-950">
                 <div
-                  class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm"
+                  class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm text-[var(--mat-sys-primary)]"
                 >
-                  <mat-icon class="text-indigo-500">photo_library</mat-icon>
+                  <mat-icon class="!flex !items-center !justify-center">photo_library</mat-icon>
                 </div>
                 <div>
                   <h4 class="font-bold text-base leading-tight">Fotografías</h4>
-                  <p class="text-indigo-600 text-xs font-medium">
+                  <p class="text-[var(--mat-sys-primary)] text-xs font-medium">
                     {{ data.photos.length }} capturas adjuntas
                   </p>
                 </div>
               </div>
               <button
                 mat-flat-button
-                class="bg-indigo-600! text-white! rounded-lg w-full sm:w-auto"
+                color="primary"
+                class="rounded-lg h-10 px-6 w-full sm:w-auto"
                 (click)="closeDialog('viewPhotos')"
               >
                 <mat-icon class="scale-90 mr-1">visibility</mat-icon> Ver Fotos

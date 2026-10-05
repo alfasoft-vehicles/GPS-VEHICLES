@@ -27,6 +27,8 @@ interface InspectionDetails {
   user: string;
   photos: string[];
   signature: number;
+  is_unregistered_vehicle?: boolean;
+  is_unregistered_owner?: boolean;
 }
 
 @Component({
@@ -80,6 +82,20 @@ export class DetailsDialogComponent implements OnInit {
 
   getOwnerCode(owner: string | undefined): string {
     return owner || 'N/A';
+  }
+
+  isVehicleUnregistered(): boolean {
+    const data = this.inspectionData();
+    if (!data) return false;
+    return (
+      data.is_unregistered_vehicle === true || !data.vehicle_id || data.vehicle_id.trim() === ''
+    );
+  }
+
+  isOwnerUnregistered(): boolean {
+    const data = this.inspectionData();
+    if (!data) return false;
+    return data.is_unregistered_owner === true || !data.owner || data.owner.trim() === '';
   }
 
   closeDialog(action: string = '') {

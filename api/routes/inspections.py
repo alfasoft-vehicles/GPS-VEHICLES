@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, UploadFile, File, BackgroundTasks
 from sqlalchemy.orm import Session
 from config.dbconnection import get_db
 from controller.inspections import *
@@ -24,8 +24,8 @@ async def post_upload_signature(inspection_id: int, db: Session = Depends(get_db
   return await upload_signature(inspection_id, db, signature)
 
 @inspections_router.post('/list', tags=["Inspections"])
-async def post_list_inspections(data: InspectionInfo, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
-  return await inspections_list(data, db, current_user)
+async def post_list_inspections(data: InspectionInfo, background_tasks: BackgroundTasks, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+  return await inspections_list(data, db, current_user, background_tasks)
 
 @inspections_router.get('/details/{inspection_id}', tags=["Inspections"])
 async def get_inspection_details(inspection_id: int, db: Session = Depends(get_db)):
