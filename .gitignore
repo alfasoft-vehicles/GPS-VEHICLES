@@ -242,3 +242,5 @@ pip-selfcheck.json
 # End of https://www.toptal.com/developers/gitignore/api/python,angular,visualstudiocode,virtualenv,appceleratortitanium
 
 .vscode/*
+
+deploy
